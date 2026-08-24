@@ -238,5 +238,11 @@ body{ color:var(--ink); font-family:var(--font-body); overflow:hidden; width:100
 .switch-ativo span::before{ content:""; position:absolute; width:2vh; height:2vh; left:0.3vh; top:0.3vh; background:#fff; border-radius:50%; transition:.2s; }
 .switch-ativo input:checked + span{ background:var(--gold); }
 .switch-ativo input:checked + span::before{ transform:translateX(2vh); }
+
+.dias-semana-seletor{ display:flex; gap:0.8vh; flex-wrap:wrap; margin-top:0.6vh; }
+.dia-chip{ position:relative; cursor:pointer; }
+.dia-chip input{ position:absolute; opacity:0; width:0; height:0; }
+.dia-chip span{ display:inline-block; padding:0.9vh 1.5vh; border-radius:999px; background:rgba(255,255,255,0.08); font-size:1.5vh; font-weight:600; border:1px solid rgba(255,255,255,0.15); transition:.15s; }
+.dia-chip input:checked + span{ background:var(--gold); color:#1a1305; border-color:var(--gold); }
 .texto-vazio{ font-size:1.7vh; color:var(--muted); }
 .admin-rodape{ padding:1.4vh 2.4vw; font-size:1.4vh; color:var(--muted); border-top:1px solid rgba(255,255,255,0.08); flex-shrink:0; }

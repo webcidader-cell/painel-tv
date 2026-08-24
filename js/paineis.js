@@ -136,6 +136,11 @@ function campanhaEstaAtiva(c){
   const hoje = dataHojeStr();
   if(c.dataInicio && hoje < c.dataInicio) return false;
   if(c.dataFim && hoje > c.dataFim) return false;
+  // dias da semana: array de números 0(domingo) a 6(sábado). Vazio/ausente = todos os dias.
+  if(Array.isArray(c.diasSemana) && c.diasSemana.length > 0){
+    const diaHoje = new Date().getDay();
+    if(!c.diasSemana.includes(diaHoje)) return false;
+  }
   if(c.horaInicio && c.horaFim){
     const agora = horaAgoraStr();
     if(c.horaInicio <= c.horaFim){

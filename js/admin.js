@@ -131,10 +131,16 @@ function renderAbaImagens(){
   if(window.lucide) lucide.createIcons();
 }
 
+function rotuloDiasSemana(dias){
+  if(!Array.isArray(dias) || dias.length===0) return "Todos os dias";
+  const nomes = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+  return dias.slice().sort((a,b)=>a-b).map(d=>nomes[d]).join(", ");
+}
 function renderAbaComerciais(){
+  const nomesDias = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
   corpo.innerHTML = `
     <h3>Nova campanha comercial</h3>
-    <p class="texto-vazio" style="margin-bottom:1.8vh;">O banner só aparece na tela dentro do período (e, se preencher, do horário) cadastrado — funciona como uma programação automática de anúncios, igual sistemas de TV Indoor profissionais.</p>
+    <p class="texto-vazio" style="margin-bottom:1.8vh;">O banner só aparece na tela dentro do período, dos dias da semana e do horário cadastrados — funciona como uma programação automática de anúncios, igual sistemas de TV Indoor profissionais.</p>
     <label class="campo"><span>Nome do anunciante</span><input id="fCampCliente" maxlength="60" placeholder="Ex: Supermercado Central"></label>
     <label class="campo"><span>URL do banner (imagem)</span><input id="fCampImagem" placeholder="https://..."></label>
     <div style="display:flex; gap:1.6vh;">
@@ -145,6 +151,12 @@ function renderAbaComerciais(){
       <label class="campo" style="flex:1;"><span>Horário inicial (opcional)</span><input id="fCampHoraInicio" type="time"></label>
       <label class="campo" style="flex:1;"><span>Horário final (opcional)</span><input id="fCampHoraFim" type="time"></label>
     </div>
+    <label class="campo">
+      <span>Dias da semana (deixe todos desmarcados = todos os dias)</span>
+      <div class="dias-semana-seletor" id="fCampDias">
+        ${nomesDias.map((n,i)=>`<label class="dia-chip"><input type="checkbox" value="${i}"><span>${n}</span></label>`).join("")}
+      </div>
+    </label>
     <button class="btn-primario" id="fCampAdd"><i data-lucide="plus"></i>Adicionar campanha</button>
     <div id="fCampMsg"></div>
     <div class="lista-titulo">Campanhas cadastradas (${CAMPANHAS.length})</div>
@@ -161,7 +173,8 @@ function renderAbaComerciais(){
     const dataFim = document.getElementById("fCampDataFim").value || "";
     const horaInicio = document.getElementById("fCampHoraInicio").value || "";
     const horaFim = document.getElementById("fCampHoraFim").value || "";
-    const novaCampanha = { id:gerarId(), cliente, imagemUrl, dataInicio, dataFim, horaInicio, horaFim, exibicoes:0 };
+    const diasSemana = [...document.querySelectorAll('#fCampDias input:checked')].map(el=>Number(el.value));
+    const novaCampanha = { id:gerarId(), cliente, imagemUrl, dataInicio, dataFim, horaInicio, horaFim, diasSemana, exibicoes:0 };
     CAMPANHAS.push(novaCampanha);
     salvarCampanha(novaCampanha);
     reiniciarRotacao();
@@ -176,7 +189,7 @@ function renderAbaComerciais(){
       <img src="${escapeAttr(c.imagemUrl)}" onerror="this.style.visibility='hidden'">
       <div class="item-texto">
         <div class="t">${escapeHtml(c.cliente)} ${ativa ? '<span style="color:var(--green);font-size:1.4vh;">● no ar agora</span>' : '<span style="color:var(--muted);font-size:1.4vh;">● fora do período</span>'}</div>
-        <div class="s">${escapeHtml(periodo)} · exibido ${c.exibicoes||0}x</div>
+        <div class="s">${escapeHtml(periodo)} · ${escapeHtml(rotuloDiasSemana(c.diasSemana))} · exibido ${c.exibicoes||0}x</div>
       </div>
       <div class="item-excluir" data-id="${c.id}"><i data-lucide="trash-2"></i></div>
     </div>`;

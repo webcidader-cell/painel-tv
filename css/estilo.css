@@ -132,14 +132,17 @@ body{ color:var(--ink); font-family:var(--font-body); overflow:hidden; width:100
 .bola-v{ background:var(--green); } .bola-e{ background:var(--muted); } .bola-d{ background:var(--coral); }
 
 /* jogos do dia */
-.jogos-lista{ flex:1; display:flex; flex-direction:column; justify-content:space-evenly; padding:0 1.4vw; overflow-y:auto; }
-.jogo-linha{ display:grid; grid-template-columns:1fr auto 1fr auto; align-items:center; gap:1.4vw; padding:1.4vh 0; border-bottom:1px solid var(--line); }
+.jogos-lista{ flex:1; display:flex; flex-direction:column; padding:0 1.4vw; overflow-y:auto; gap:0.4vh; }
+.jogo-linha{ padding:1vh 0; border-bottom:1px solid var(--line); }
 .jogo-linha:last-child{ border-bottom:none; }
-.jogo-time{ font-size:2vh; font-weight:600; }
+.jogo-liga{ font-family:var(--font-mono); font-size:1.1vh; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:0.6vh; }
+.jogo-partida{ display:grid; grid-template-columns:1fr auto 1fr auto; align-items:center; gap:1.4vw; }
+.jogo-time{ font-size:1.9vh; font-weight:600; }
 .jogo-time-direita{ text-align:right; }
 .jogo-time-nome{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.jogo-placar{ font-family:var(--font-display); font-weight:800; font-size:2.6vh; white-space:nowrap; }
-.jogo-status{ font-family:var(--font-mono); font-size:1.3vh; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; text-align:right; width:9vw; }
+.jogo-placar{ font-family:var(--font-display); font-weight:800; font-size:2.4vh; white-space:nowrap; }
+.jogo-status{ font-family:var(--font-mono); font-size:1.2vh; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; text-align:right; width:9vw; }
+.jogos-rodape{ text-align:center; padding:1vh 0 0.4vh; font-family:var(--font-mono); font-size:1.3vh; color:var(--muted); letter-spacing:.04em; }
 .stat-value{ font-family:var(--font-display); font-weight:700; font-size:3.4vh; }
 
 /* cotações */

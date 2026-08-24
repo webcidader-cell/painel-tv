@@ -84,16 +84,16 @@ function rotuloStatusJogo(status){
 }
 function montarPainelJogosDoDia(){
   if(!(CONFIG.apiFutebolKey||"").trim()){
-    return `<div class="panel panel-aviso"><div class="eyebrow"><i data-lucide="calendar-days"></i>Brasileirão</div><div class="aviso-titulo" style="font-size:4.5vh;">Jogos do dia não configurado</div><div class="aviso-texto">Cadastre uma chave gratuita da API-Football em Configurações para ativar essa tela.</div></div>`;
+    return `<div class="panel panel-aviso"><div class="eyebrow"><i data-lucide="calendar-days"></i>Futebol</div><div class="aviso-titulo" style="font-size:4.5vh;">Jogos do dia não configurado</div><div class="aviso-texto">Cadastre uma chave gratuita da API-Football em Configurações para ativar essa tela.</div></div>`;
   }
   if(dados.erroJogos){
-    return `<div class="panel panel-aviso"><div class="eyebrow"><i data-lucide="wifi-off"></i>Brasileirão</div><div class="aviso-titulo" style="font-size:4.5vh;">Não foi possível carregar os jogos</div><div class="aviso-texto">Verifique a internet da TV ou se a chave da API-Football ainda é válida.</div></div>`;
+    return `<div class="panel panel-aviso"><div class="eyebrow"><i data-lucide="wifi-off"></i>Futebol</div><div class="aviso-titulo" style="font-size:4.5vh;">Não foi possível carregar os jogos</div><div class="aviso-texto">Verifique a internet da TV ou se a chave da API-Football ainda é válida.</div></div>`;
   }
   if(dados.jogosDoDia === null){
-    return `<div class="panel panel-aviso"><div class="eyebrow"><i data-lucide="calendar-days"></i>Brasileirão</div><div class="aviso-titulo">Carregando jogos do dia...</div></div>`;
+    return `<div class="panel panel-aviso"><div class="eyebrow"><i data-lucide="calendar-days"></i>Futebol</div><div class="aviso-titulo">Carregando jogos do dia...</div></div>`;
   }
   if(!dados.jogosDoDia.length){
-    return `<div class="panel panel-aviso"><div class="eyebrow"><i data-lucide="calendar-days"></i>Brasileirão</div><div class="aviso-titulo" style="font-size:4.5vh;">Sem jogos hoje</div><div class="aviso-texto">Não há partidas do Brasileirão marcadas para hoje.</div></div>`;
+    return `<div class="panel panel-aviso"><div class="eyebrow"><i data-lucide="calendar-days"></i>Futebol</div><div class="aviso-titulo" style="font-size:4.5vh;">Sem jogos hoje</div><div class="aviso-texto">Não há partidas encontradas para hoje.</div></div>`;
   }
   const linhas = dados.jogosDoDia.map(j=>{
     const emAndamento = ["1H","2H","HT","ET"].includes(j.status);
@@ -101,16 +101,22 @@ function montarPainelJogosDoDia(){
     const placar = (encerrado || emAndamento) ? `${j.golsCasa ?? 0} — ${j.golsFora ?? 0}` : "×";
     const corStatus = emAndamento ? "var(--green)" : (encerrado ? "var(--muted)" : "var(--gold)");
     return `<div class="jogo-linha">
-      <div class="jogo-time"><span class="jogo-time-nome">${escapeHtml(truncar(j.casa, 22))}</span></div>
-      <div class="jogo-placar" style="color:${corStatus};">${escapeHtml(placar)}</div>
-      <div class="jogo-time jogo-time-direita"><span class="jogo-time-nome">${escapeHtml(truncar(j.fora, 22))}</span></div>
-      <div class="jogo-status" style="color:${corStatus};">${emAndamento ? "● AO VIVO" : (encerrado ? "Encerrado" : j.horario)}</div>
+      <div class="jogo-liga">${escapeHtml(truncar(j.liga + (j.pais ? " · "+j.pais : ""), 34))}</div>
+      <div class="jogo-partida">
+        <div class="jogo-time"><span class="jogo-time-nome">${escapeHtml(truncar(j.casa, 20))}</span></div>
+        <div class="jogo-placar" style="color:${corStatus};">${escapeHtml(placar)}</div>
+        <div class="jogo-time jogo-time-direita"><span class="jogo-time-nome">${escapeHtml(truncar(j.fora, 20))}</span></div>
+        <div class="jogo-status" style="color:${corStatus};">${emAndamento ? "● AO VIVO" : (encerrado ? "Encerrado" : j.horario)}</div>
+      </div>
     </div>`;
   }).join("");
+  const restantes = (dados.totalJogosDoDia||0) - dados.jogosDoDia.length;
+  const rodape = restantes > 0 ? `<div class="jogos-rodape">+ ${restantes} outro${restantes>1?"s":""} jogo${restantes>1?"s":""} hoje</div>` : "";
   return `<div class="panel"><div class="panel-tabela">
-    <div class="tabela-titulo"><i data-lucide="calendar-days"></i>Jogos do dia — Brasileirão</div>
+    <div class="tabela-titulo"><i data-lucide="calendar-days"></i>Jogos do dia</div>
     <div class="tabela-wrap" style="padding:1vh 0;">
       <div class="jogos-lista">${linhas}</div>
+      ${rodape}
     </div>
   </div></div>`;
 }

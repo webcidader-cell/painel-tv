@@ -225,7 +225,7 @@ function itensPlaylistDisponiveis(){
     {tipo:"clima", id:null, label:"Previsão do tempo", icone:"cloud"},
     {tipo:"cotacoes", id:null, label:"Cotações do mercado", icone:"landmark"}
   ];
-  if((CONFIG.apiFutebolKey||"").trim()) itens.push({tipo:"jogosDoDia", id:null, label:"Jogos do dia (Brasileirão)", icone:"calendar-days"});
+  if((CONFIG.apiFutebolKey||"").trim()) itens.push({tipo:"jogosDoDia", id:null, label:"Jogos do dia (Futebol)", icone:"calendar-days"});
   AVISOS.forEach(a=>itens.push({tipo:"aviso", id:a.id, label:"Aviso: "+(a.titulo||"(sem título)"), icone:"megaphone"}));
   NOTICIAS_MANUAIS.forEach(n=>itens.push({tipo:"noticiaManual", id:n.id, label:"Notícia: "+(n.titulo||"(sem título)"), icone:"newspaper"}));
   IMAGENS.forEach(im=>itens.push({tipo:"imagem", id:im.id, label:"Imagem: "+(im.legenda||"(sem legenda)"), icone:"image"}));

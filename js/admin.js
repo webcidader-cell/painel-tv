@@ -36,6 +36,7 @@ function renderAba(){
   else if(abaAtual==="imagens") renderAbaImagens();
   else if(abaAtual==="comerciais") renderAbaComerciais();
   else if(abaAtual==="tabela") renderAbaTabela();
+  else if(abaAtual==="playlist") renderAbaPlaylist();
   else if(abaAtual==="status") renderAbaStatus();
   else if(abaAtual==="avisos") renderAbaAvisos();
   else if(abaAtual==="config") renderAbaConfig();
@@ -186,6 +187,88 @@ function renderAbaComerciais(){
     reiniciarRotacao();
     renderAbaComerciais();
   }));
+  if(window.lucide) lucide.createIcons();
+}
+
+function itensPlaylistDisponiveis(){
+  const itens = [
+    {tipo:"clima", id:null, label:"Previsão do tempo", icone:"cloud"},
+    {tipo:"cotacoes", id:null, label:"Cotações do mercado", icone:"landmark"}
+  ];
+  if(TABELA.length) itens.push({tipo:"tabela", id:null, label:"Tabela do Brasileirão", icone:"trophy"});
+  AVISOS.forEach(a=>itens.push({tipo:"aviso", id:a.id, label:"Aviso: "+(a.titulo||"(sem título)"), icone:"megaphone"}));
+  NOTICIAS_MANUAIS.forEach(n=>itens.push({tipo:"noticiaManual", id:n.id, label:"Notícia: "+(n.titulo||"(sem título)"), icone:"newspaper"}));
+  IMAGENS.forEach(im=>itens.push({tipo:"imagem", id:im.id, label:"Imagem: "+(im.legenda||"(sem legenda)"), icone:"image"}));
+  campanhasAtivasAgora().forEach(c=>itens.push({tipo:"campanha", id:c.id, label:"Comercial: "+(c.cliente||"(sem nome)"), icone:"badge-dollar-sign"}));
+  return itens;
+}
+
+function renderAbaPlaylist(){
+  const itens = itensPlaylistDisponiveis();
+  let precisouSalvar = false;
+  itens.forEach(it=>{ if(garantirEntradaPlaylist(chavePlaylist(it.tipo, it.id))) precisouSalvar = true; });
+  if(precisouSalvar) salvarDados(CHAVES.playlist, PLAYLIST);
+
+  const ordenados = itens
+    .map(it=>({ ...it, chave: chavePlaylist(it.tipo, it.id), cfg: configPlaylist(chavePlaylist(it.tipo, it.id)) }))
+    .sort((a,b)=>(a.cfg.ordem??9999) - (b.cfg.ordem??9999));
+
+  corpo.innerHTML = `
+    <h3>Ordem de exibição</h3>
+    <p class="texto-vazio" style="margin-bottom:1.8vh;">Use as setas para reordenar, o interruptor para tirar/colocar algo na rotação sem apagar o conteúdo, e o campo numérico pra dar um tempo diferente do padrão (em segundos) só pra aquele item.</p>
+    <div id="listaPlaylist"></div>
+  `;
+
+  const listaEl = document.getElementById("listaPlaylist");
+  if(!ordenados.length){
+    listaEl.innerHTML = `<p class="texto-vazio">Nada disponível ainda — cadastre avisos, notícias, imagens ou comerciais nas outras abas.</p>`;
+  } else {
+    listaEl.innerHTML = ordenados.map((it,i)=>`
+      <div class="item-cadastrado">
+        <div class="icon-badge" style="width:4.4vh;height:4.4vh;flex-shrink:0;"><i data-lucide="${it.icone}"></i></div>
+        <div class="item-texto"><div class="t">${escapeHtml(it.label)}</div><div class="s">${it.cfg.duracao ? it.cfg.duracao+"s (personalizado)" : "Padrão ("+(CONFIG.tempoRotacaoSegundos||12)+"s)"}</div></div>
+        <div style="display:flex; align-items:center; gap:1vh; flex-shrink:0;">
+          <button class="btn-seta" data-acao="subir" data-chave="${it.chave}" ${i===0?"disabled":""} title="Mover para cima"><i data-lucide="chevron-up"></i></button>
+          <button class="btn-seta" data-acao="descer" data-chave="${it.chave}" ${i===ordenados.length-1?"disabled":""} title="Mover para baixo"><i data-lucide="chevron-down"></i></button>
+          <input type="number" class="input-duracao" data-chave="${it.chave}" min="3" max="120" placeholder="${CONFIG.tempoRotacaoSegundos||12}" value="${it.cfg.duracao||""}" title="Duração personalizada em segundos">
+          <label class="switch-ativo" title="Ativar/desativar na rotação">
+            <input type="checkbox" data-chave="${it.chave}" ${it.cfg.ativo!==false?"checked":""}>
+            <span></span>
+          </label>
+        </div>
+      </div>`).join("");
+
+    listaEl.querySelectorAll('input[type="checkbox"]').forEach(chk=>chk.addEventListener("change", ()=>{
+      const chave = chk.dataset.chave;
+      PLAYLIST[chave] = { ...configPlaylist(chave), ativo: chk.checked };
+      salvarDados(CHAVES.playlist, PLAYLIST);
+      reiniciarRotacao();
+    }));
+
+    listaEl.querySelectorAll(".input-duracao").forEach(inp=>inp.addEventListener("change", ()=>{
+      const chave = inp.dataset.chave;
+      const valor = inp.value.trim() ? Math.max(3, Math.min(120, Number(inp.value))) : null;
+      PLAYLIST[chave] = { ...configPlaylist(chave), duracao: valor };
+      salvarDados(CHAVES.playlist, PLAYLIST);
+      reiniciarRotacao();
+      renderAbaPlaylist();
+    }));
+
+    listaEl.querySelectorAll(".btn-seta").forEach(btn=>btn.addEventListener("click", ()=>{
+      const chave = btn.dataset.chave;
+      const acao = btn.dataset.acao;
+      const posAtual = ordenados.findIndex(o=>o.chave===chave);
+      const posAlvo = acao === "subir" ? posAtual - 1 : posAtual + 1;
+      if(posAlvo < 0 || posAlvo >= ordenados.length) return;
+      // troca a ordem entre o item movido e o vizinho, depois reindexa tudo de 0 a N-1
+      const nova = [...ordenados];
+      [nova[posAtual], nova[posAlvo]] = [nova[posAlvo], nova[posAtual]];
+      nova.forEach((it, idx)=>{ PLAYLIST[it.chave] = { ...configPlaylist(it.chave), ordem: idx }; });
+      salvarDados(CHAVES.playlist, PLAYLIST);
+      reiniciarRotacao();
+      renderAbaPlaylist();
+    }));
+  }
   if(window.lucide) lucide.createIcons();
 }
 

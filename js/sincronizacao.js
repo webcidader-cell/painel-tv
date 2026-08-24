@@ -53,4 +53,10 @@ function ativarEscutaDaNuvem(){
     reiniciarRotacaoComDebounce();
     if(overlay.classList.contains("aberto") && abaAtual==="tabela") renderAbaTabela();
   });
+  registrar("playlist", snap=>{
+    PLAYLIST = snap.val() || {};
+    gravarLocal(CHAVES.playlist, PLAYLIST);
+    reiniciarRotacaoComDebounce();
+    if(overlay.classList.contains("aberto") && abaAtual==="playlist") renderAbaPlaylist();
+  });
 }

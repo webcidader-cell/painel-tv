@@ -224,5 +224,19 @@ body{ color:var(--ink); font-family:var(--font-body); overflow:hidden; width:100
 .item-excluir{ width:4vh; height:4vh; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; }
 .item-excluir:hover{ background:rgba(255,255,255,0.1); }
 .item-excluir svg{ width:2vh; height:2vh; color:var(--coral); }
+
+.btn-seta{ width:3.4vh; height:3.4vh; border-radius:8px; background:rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; cursor:pointer; border:none; color:var(--ink); flex-shrink:0; }
+.btn-seta:hover{ background:rgba(255,255,255,0.16); }
+.btn-seta:disabled{ opacity:.25; cursor:default; }
+.btn-seta svg{ width:2vh; height:2vh; }
+
+.input-duracao{ width:6.5vh; text-align:center; border-radius:8px; padding:0.8vh 0.4vh; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15); color:var(--ink); font-family:var(--font-mono); font-size:1.4vh; flex-shrink:0; }
+
+.switch-ativo{ position:relative; display:inline-block; width:4.6vh; height:2.6vh; flex-shrink:0; }
+.switch-ativo input{ opacity:0; width:0; height:0; position:absolute; }
+.switch-ativo span{ position:absolute; cursor:pointer; inset:0; background:rgba(255,255,255,0.15); border-radius:999px; transition:.2s; }
+.switch-ativo span::before{ content:""; position:absolute; width:2vh; height:2vh; left:0.3vh; top:0.3vh; background:#fff; border-radius:50%; transition:.2s; }
+.switch-ativo input:checked + span{ background:var(--gold); }
+.switch-ativo input:checked + span::before{ transform:translateX(2vh); }
 .texto-vazio{ font-size:1.7vh; color:var(--muted); }
 .admin-rodape{ padding:1.4vh 2.4vw; font-size:1.4vh; color:var(--muted); border-top:1px solid rgba(255,255,255,0.08); flex-shrink:0; }

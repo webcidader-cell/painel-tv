@@ -1,17 +1,56 @@
 let indicePainel = 0;
 let ultimoPainelAtivo = null; // rastreia o que está REALMENTE visível, pra não contar exibição em toda re-renderização
 let timeoutConfirmarExibicao = null;
-function listaDePaineis(){
+
+/* ============================================================
+   PLAYLIST — controle de quais telas entram na rotação, em
+   que ordem, e por quanto tempo cada uma fica visível.
+   ============================================================ */
+function chavePlaylist(tipo, id){ return tipo + (id ? ":" + id : ""); }
+function configPlaylist(chave){
+  return PLAYLIST[chave] || { ativo: true, ordem: 9999, duracao: null };
+}
+// Garante que todo item novo (aviso/notícia/imagem/comercial recém-criado) já
+// nasça com uma entrada na playlist — ativo, no final da fila.
+function garantirEntradaPlaylist(chave){
+  if(PLAYLIST[chave]) return false;
+  const maiorOrdem = Object.values(PLAYLIST).reduce((max,e)=>Math.max(max, e.ordem||0), -1);
+  PLAYLIST[chave] = { ativo: true, ordem: maiorOrdem + 1, duracao: null };
+  return true;
+}
+
+function listaBaseDePaineis(){
   const lista = [ {tipo:"clima", html:montarPainelClima()}, {tipo:"cotacoes", html:montarPainelCotacoes()} ];
   if(TABELA.length) lista.push({tipo:"tabela", html:montarPainelTabela()});
-  AVISOS.forEach(a=>lista.push({tipo:"aviso", html:montarPainelAviso(a)}));
-  NOTICIAS_MANUAIS.forEach(n=>lista.push({tipo:"noticiaManual", html:montarPainelNoticiaManual(n)}));
-  IMAGENS.forEach(im=>lista.push({tipo:"imagem", html:montarPainelImagem(im)}));
+  AVISOS.forEach(a=>lista.push({tipo:"aviso", id:a.id, html:montarPainelAviso(a)}));
+  NOTICIAS_MANUAIS.forEach(n=>lista.push({tipo:"noticiaManual", id:n.id, html:montarPainelNoticiaManual(n)}));
+  IMAGENS.forEach(im=>lista.push({tipo:"imagem", id:im.id, html:montarPainelImagem(im)}));
   campanhasAtivasAgora().forEach(c=>lista.push({tipo:"campanha", id:c.id, html:montarPainelCampanha(c)}));
   return lista;
 }
+function listaDePaineis(){
+  const base = listaBaseDePaineis();
+  let alterou = false;
+  base.forEach(item=>{ if(garantirEntradaPlaylist(chavePlaylist(item.tipo, item.id))) alterou = true; });
+  if(alterou) salvarDados(CHAVES.playlist, PLAYLIST); // salva silenciosamente as entradas novas criadas agora
+
+  return base
+    .map(item=>{
+      const chave = chavePlaylist(item.tipo, item.id);
+      const cfg = configPlaylist(chave);
+      return { ...item, chave, ativo: cfg.ativo !== false, ordem: cfg.ordem ?? 9999, duracaoSegundos: cfg.duracao || null };
+    })
+    .filter(item=>item.ativo)
+    .sort((a,b)=>a.ordem - b.ordem);
+}
+
 function renderizarPainelAtual(){
   const lista = listaDePaineis();
+  if(!lista.length){
+    document.getElementById("stage").innerHTML = `<div class="panel panel-aviso"><div class="eyebrow"><i data-lucide="list-x"></i>Playlist</div><div class="aviso-titulo" style="font-size:4.5vh;">Nenhuma tela ativa</div><div class="aviso-texto">Vá em Playlist, no painel de administração, e ative pelo menos uma tela.</div></div>`;
+    if(window.lucide) lucide.createIcons();
+    return;
+  }
   if(indicePainel >= lista.length) indicePainel = 0;
   const atual = lista[indicePainel];
   document.getElementById("stage").innerHTML = atual ? atual.html : "";
@@ -27,7 +66,8 @@ function renderizarPainelAtual(){
     ultimoPainelAtivo = chaveAtual;
     if(atual && atual.tipo === "campanha"){
       const idParaContar = atual.id;
-      const tempoMinimoMs = Math.max((CONFIG.tempoRotacaoSegundos||12) * 0.8, 3) * 1000;
+      const duracaoDesteItemSeg = atual.duracaoSegundos || CONFIG.tempoRotacaoSegundos || 12;
+      const tempoMinimoMs = Math.max(duracaoDesteItemSeg * 0.8, 3) * 1000;
       timeoutConfirmarExibicao = setTimeout(()=>{
         if(ultimoPainelAtivo === chaveAtual) registrarExibicaoCampanha(idParaContar);
       }, tempoMinimoMs);
@@ -35,6 +75,13 @@ function renderizarPainelAtual(){
   }
   if(window.lucide) lucide.createIcons();
 }
+
+function duracaoAtualSegundos(){
+  const lista = listaDePaineis();
+  const atual = lista[indicePainel];
+  return (atual && atual.duracaoSegundos) || CONFIG.tempoRotacaoSegundos || 12;
+}
+
 function avancarPainel(){
   const stageEl = document.getElementById("stage");
   stageEl.style.opacity = "0";
@@ -44,12 +91,14 @@ function avancarPainel(){
     renderizarPainelAtual();
     stageEl.style.opacity = "1";
     iniciarBarraProgresso();
+    agendarProximoAvanco();
   }, 500);
 }
 function iniciarBarraProgresso(){
   const fill = document.getElementById("progressFill");
+  const segundos = duracaoAtualSegundos();
   fill.style.transition="none"; fill.style.width="0%"; void fill.offsetWidth;
-  fill.style.transition=`width ${CONFIG.tempoRotacaoSegundos}s linear`; fill.style.width="100%";
+  fill.style.transition=`width ${segundos}s linear`; fill.style.width="100%";
 }
 function atualizarBadge(){
   const partes=[];
@@ -58,13 +107,18 @@ function atualizarBadge(){
   document.getElementById("updatedBadge").textContent = partes.length ? "Atualizado — "+partes.join(" · ") : "";
 }
 
-let intervaloRotacao = null;
+let timeoutProximoAvanco = null;
+function agendarProximoAvanco(){
+  if(timeoutProximoAvanco) clearTimeout(timeoutProximoAvanco);
+  const segundos = duracaoAtualSegundos();
+  timeoutProximoAvanco = setTimeout(avancarPainel, segundos * 1000);
+}
 function reiniciarRotacao(){
-  if(intervaloRotacao) clearInterval(intervaloRotacao);
+  if(timeoutProximoAvanco) clearTimeout(timeoutProximoAvanco);
   indicePainel = 0;
   renderizarPainelAtual();
   iniciarBarraProgresso();
-  intervaloRotacao = setInterval(avancarPainel, CONFIG.tempoRotacaoSegundos*1000);
+  agendarProximoAvanco();
 }
 let timerDebounceRotacao = null;
 function reiniciarRotacaoComDebounce(){

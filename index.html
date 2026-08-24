@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel TV Indoor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@1.33.0/dist/umd/lucide.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+
+<div class="tela-login" id="telaLogin">
+  <div class="login-card">
+    <div class="login-marca">
+      <div class="brand-mark"><i data-lucide="monitor-play"></i></div>
+    </div>
+    <div class="login-titulo">Entrar no painel</div>
+    <div class="login-sub">Use o e-mail e senha desse cliente para acessar</div>
+    <label class="login-campo"><span>E-mail</span><input type="email" id="loginEmail" autocomplete="username"></label>
+    <label class="login-campo"><span>Senha</span><input type="password" id="loginSenha" autocomplete="current-password"></label>
+    <button class="login-btn" id="btnLoginEntrar">Entrar</button>
+    <div class="login-erro" id="loginErro"></div>
+    <div class="login-rodape" id="loginRodape"></div>
+  </div>
+</div>
+
+<div class="tv" id="tvApp" style="display:none;">
+  <div class="sky-scene" id="skyScene">
+    <div class="celestial sun" id="elSun"></div>
+    <div class="celestial moon" id="elMoon"></div>
+    <div class="stars" id="elStars"></div>
+    <div class="clouds" id="elClouds"><div class="cloud cloud1"></div><div class="cloud cloud2"></div><div class="cloud cloud3"></div></div>
+    <div class="overcast-veil" id="elVeil"></div>
+    <div class="fog" id="elFog"><div class="fog-band"></div><div class="fog-band"></div><div class="fog-band"></div></div>
+    <div class="rain" id="elRain"></div>
+    <div class="lightning" id="elLightning"></div>
+  </div>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark"><i data-lucide="monitor-play"></i></div>
+      <div class="brand-text">
+        <div class="brand-name" id="nomePainel">Painel Informativo</div>
+        <div class="brand-sub"><span class="live-dot"></span>AO VIVO</div>
+      </div>
+    </div>
+    <div class="clock-block">
+      <div class="time" id="relogio">--:--:--</div>
+      <div class="date" id="dataAtual"><i data-lucide="calendar-days"></i><span>carregando...</span></div>
+    </div>
+  </header>
+
+  <div class="stage-wrap">
+    <div class="progress-rail"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="stage" id="stage"></div>
+    <div class="updated-badge" id="updatedBadge"></div>
+  </div>
+
+  <footer class="ticker">
+    <div class="ticker-label"><i data-lucide="newspaper"></i>NOTÍCIAS</div>
+    <div class="ticker-viewport"><div class="ticker-track" id="tickerTrack" style="animation:scroll-left 30s linear infinite;"><span>Carregando últimas notícias...</span></div></div>
+  </footer>
+</div>
+
+<div class="btn-admin" id="btnAdmin" title="Administrar conteúdo"><i data-lucide="settings"></i></div>
+
+<div class="admin-overlay" id="adminOverlay">
+  <div class="admin-topo">
+    <div class="admin-titulo"><i data-lucide="settings"></i>Administrar painel</div>
+    <div id="badgeNuvem"></div>
+    <button id="btnLogout" style="background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:0.8vh 1.4vh;font-size:1.4vh;cursor:pointer;margin-right:1vh;display:flex;align-items:center;gap:.5vh;"><i data-lucide="log-out" style="width:1.6vh;height:1.6vh;"></i>Sair</button>
+    <div class="admin-fechar" id="btnFecharAdmin"><i data-lucide="x"></i></div>
+  </div>
+  <div class="admin-abas">
+    <div class="admin-aba ativa" data-aba="noticias"><i data-lucide="newspaper"></i>Notícias</div>
+    <div class="admin-aba" data-aba="imagens"><i data-lucide="image-plus"></i>Imagens</div>
+    <div class="admin-aba" data-aba="comerciais"><i data-lucide="badge-dollar-sign"></i>Comerciais</div>
+    <div class="admin-aba" data-aba="tabela"><i data-lucide="trophy"></i>Tabela</div>
+    <div class="admin-aba" data-aba="status"><i data-lucide="activity"></i>Status</div>
+    <div class="admin-aba" data-aba="avisos"><i data-lucide="megaphone"></i>Avisos</div>
+    <div class="admin-aba" data-aba="config"><i data-lucide="sliders-horizontal"></i>Configurações</div>
+  </div>
+  <div class="admin-corpo" id="adminCorpo"></div>
+  <div id="avisoArmazenamento"></div>
+  <div class="admin-rodape">Salvo neste navegador/TV. Clima, cotações e o ticker de notícias precisam de internet; notícias, imagens e avisos cadastrados aqui funcionam mesmo offline.</div>
+</div>
+
+<script src="js/saude.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/armazenamento.js"></script>
+<script src="js/sincronizacao.js"></script>
+<script src="js/relogio.js"></script>
+<script src="js/clima.js"></script>
+<script src="js/dados-externos.js"></script>
+<script src="js/paineis.js"></script>
+<script src="js/rotacao.js"></script>
+<script src="js/app.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,228 @@
+:root{
+  --ink:#eef1f7; --muted:#b9c1d4; --gold:#f2b705; --cyan:#6fe0f0; --coral:#ff6b5b; --green:#4ad991;
+  --glass:rgba(10,17,32,0.46); --glass-strong:rgba(8,14,26,0.62); --line:rgba(255,255,255,0.14);
+  --font-display:'Barlow Condensed',sans-serif; --font-body:'Inter',sans-serif; --font-mono:'Space Mono',monospace;
+  --sky-top:#1a6fb0; --sky-bottom:#8ec9f0;
+}
+*{ box-sizing:border-box; margin:0; padding:0; }
+html,body{ height:100%; }
+body{ color:var(--ink); font-family:var(--font-body); overflow:hidden; width:100vw; height:100vh; }
+.tv{ position:relative; display:flex; flex-direction:column; width:100vw; height:100vh; }
+
+/* ---------- CÉU ---------- */
+.sky-scene{ position:absolute; inset:0; z-index:0; overflow:hidden; background:linear-gradient(180deg,var(--sky-top) 0%,var(--sky-bottom) 100%); transition:background 2.5s ease; }
+.sky-scene::after{ content:""; position:absolute; inset:0; background:radial-gradient(120% 90% at 50% 100%, rgba(0,0,0,0.35), transparent 60%); }
+.celestial{ position:absolute; top:8vh; right:10vw; width:11vh; height:11vh; border-radius:50%; opacity:0; transition:opacity 1.5s ease; }
+.celestial.on{ opacity:1; }
+.sun{ background:radial-gradient(circle,#fff2c4 0%,var(--gold) 55%,transparent 75%); box-shadow:0 0 8vh 2vh rgba(242,183,5,0.35); }
+.moon{ background:radial-gradient(circle at 35% 35%,#fdfdfd 0%,#cfd8e6 55%,transparent 78%); box-shadow:0 0 6vh 1.5vh rgba(207,216,230,0.25); }
+.stars{ position:absolute; inset:0; opacity:0; transition:opacity 1.5s ease; }
+.stars.on{ opacity:1; }
+.star{ position:absolute; width:3px; height:3px; border-radius:50%; background:#fff; animation:twinkle 3s ease-in-out infinite; }
+@keyframes twinkle{ 0%,100%{opacity:.25;} 50%{opacity:1;} }
+.clouds{ position:absolute; inset:0; opacity:0; transition:opacity 1.5s ease; }
+.clouds.on{ opacity:1; }
+.cloud{ position:absolute; background:rgba(255,255,255,0.85); border-radius:50%; filter:blur(1px); }
+.cloud::before,.cloud::after{ content:""; position:absolute; background:inherit; border-radius:50%; }
+.cloud1{ width:14vh; height:5vh; top:14vh; left:-20vh; animation:drift 55s linear infinite; }
+.cloud1::before{ width:9vh; height:9vh; top:-4vh; left:2vh; } .cloud1::after{ width:7vh; height:7vh; top:-2vh; left:8vh; }
+.cloud2{ width:10vh; height:4vh; top:26vh; left:-14vh; opacity:.75; animation:drift 75s linear infinite; animation-delay:-20s; }
+.cloud2::before{ width:6vh; height:6vh; top:-2.5vh; left:1.5vh; } .cloud2::after{ width:5vh; height:5vh; top:-1.5vh; left:6vh; }
+.cloud3{ width:18vh; height:6vh; top:6vh; left:-24vh; opacity:.55; animation:drift 95s linear infinite; animation-delay:-50s; }
+.cloud3::before{ width:10vh; height:10vh; top:-5vh; left:3vh; } .cloud3::after{ width:8vh; height:8vh; top:-3vh; left:11vh; }
+@keyframes drift{ from{transform:translateX(0);} to{transform:translateX(140vw);} }
+.overcast-veil{ position:absolute; inset:0; background:rgba(60,72,92,0.28); opacity:0; transition:opacity 1.5s ease; }
+.overcast-veil.on{ opacity:1; }
+.fog{ position:absolute; inset:0; opacity:0; transition:opacity 1.5s ease; }
+.fog.on{ opacity:1; }
+.fog-band{ position:absolute; left:-10vw; width:120vw; height:6vh; background:rgba(255,255,255,0.35); filter:blur(6px); border-radius:50%; animation:fogdrift 40s linear infinite; }
+.fog-band:nth-child(1){ top:20vh; animation-duration:46s; }
+.fog-band:nth-child(2){ top:45vh; animation-duration:60s; animation-delay:-15s; opacity:.7; }
+.fog-band:nth-child(3){ top:68vh; animation-duration:52s; animation-delay:-30s; opacity:.5; }
+@keyframes fogdrift{ from{transform:translateX(-6vw);} to{transform:translateX(6vw);} }
+.rain{ position:absolute; inset:0; opacity:0; transition:opacity 1s ease; }
+.rain.on{ opacity:1; }
+.drop{ position:absolute; top:-10vh; width:2px; height:3.4vh; background:linear-gradient(180deg,transparent,rgba(200,230,255,0.75)); animation:fall linear infinite; }
+@keyframes fall{ to{ transform:translateY(120vh); } }
+.lightning{ position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none; }
+.lightning.flash{ animation:strike .9s ease; }
+@keyframes strike{ 0%{opacity:0;} 6%{opacity:.85;} 10%{opacity:0;} 14%{opacity:.6;} 18%{opacity:0;} 100%{opacity:0;} }
+
+/* ---------- TOPO ---------- */
+.topbar{ position:relative; z-index:2; display:flex; align-items:center; justify-content:space-between; padding:2.2vh 3vw; border-bottom:1px solid var(--line); background:var(--glass); backdrop-filter:blur(14px); flex:0 0 auto; }
+.brand{ display:flex; align-items:center; gap:1.1vw; }
+.brand-mark{ width:3.6vh; height:3.6vh; border-radius:8px; background:linear-gradient(135deg,var(--gold),#c98f02); display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#1a1305; }
+.brand-mark svg{ width:2.1vh; height:2.1vh; }
+.brand-text{ display:flex; flex-direction:column; line-height:1.05; }
+.brand-name{ font-family:var(--font-display); font-weight:700; font-size:2.6vh; letter-spacing:.02em; }
+.brand-sub{ display:flex; align-items:center; font-family:var(--font-mono); font-size:1.15vh; letter-spacing:.18em; color:var(--muted); text-transform:uppercase; margin-top:2px; }
+.live-dot{ display:inline-block; width:.9vh; height:.9vh; border-radius:50%; background:var(--coral); margin-right:.5vw; animation:pulse 1.6s ease-in-out infinite; }
+@keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.5;} }
+.clock-block{ text-align:right; }
+.time{ font-family:var(--font-mono); font-weight:700; font-size:4vh; letter-spacing:.02em; }
+.date{ display:flex; align-items:center; justify-content:flex-end; gap:.4vw; font-size:1.6vh; color:var(--muted); text-transform:capitalize; margin-top:.3vh; }
+.date svg{ width:1.6vh; height:1.6vh; }
+
+/* ---------- PALCO ---------- */
+.stage-wrap{ position:relative; z-index:2; flex:1 1 auto; padding:2.4vh 3vw; overflow:hidden; }
+.progress-rail{ position:absolute; top:0; left:0; right:0; height:3px; background:rgba(255,255,255,0.15); }
+.progress-fill{ height:100%; width:0%; background:linear-gradient(90deg,var(--gold),var(--cyan)); }
+.stage{ height:100%; display:flex; align-items:center; justify-content:center; transition:opacity 0.5s ease; }
+.panel{ width:100%; height:100%; display:none; align-items:center; opacity:0; animation:fadeIn .6s ease forwards; }
+.panel.active{ display:flex; }
+@keyframes fadeIn{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;} }
+.eyebrow{ display:flex; align-items:center; gap:.6vw; font-family:var(--font-mono); font-size:1.5vh; letter-spacing:.22em; text-transform:uppercase; color:var(--muted); margin-bottom:1.4vh; }
+.eyebrow svg{ width:1.8vh; height:1.8vh; color:var(--gold); }
+.icon-badge{ display:flex; align-items:center; justify-content:center; border-radius:50%; background:rgba(255,255,255,0.12); border:1px solid var(--line); }
+
+/* clima */
+.panel-clima{ gap:5vw; }
+.clima-esquerda{ flex:0 0 auto; display:flex; flex-direction:column; }
+.clima-icon-wrap{ width:11vh; height:11vh; margin-bottom:1vh; }
+.clima-icon-wrap svg{ width:100%; height:100%; color:var(--gold); filter:drop-shadow(0 4px 10px rgba(0,0,0,.35)); }
+.clima-cidade{ font-family:var(--font-display); font-weight:700; font-size:3.6vh; text-shadow:0 2px 10px rgba(0,0,0,.35); }
+.clima-temp{ font-family:var(--font-display); font-weight:800; font-size:14vh; line-height:.9; color:#fff; text-shadow:0 4px 16px rgba(0,0,0,.35); display:flex; align-items:flex-start; }
+.clima-temp small{ font-size:5vh; margin-top:1.2vh; color:var(--muted); }
+.clima-desc{ font-size:2.1vh; text-transform:capitalize; margin-top:.5vh; }
+.clima-direita{ flex:1; display:grid; grid-template-columns:1fr 1fr; gap:1.6vh 2vw; }
+.stat-card{ display:flex; align-items:center; gap:1.4vw; background:var(--glass); backdrop-filter:blur(14px); border:1px solid var(--line); border-radius:14px; padding:2vh 2vw; }
+.stat-card .icon-badge{ width:5vh; height:5vh; flex-shrink:0; }
+.stat-card .icon-badge svg{ width:2.6vh; height:2.6vh; color:var(--cyan); }
+.stat-label{ font-family:var(--font-mono); font-size:1.3vh; letter-spacing:.14em; color:var(--muted); text-transform:uppercase; }
+
+/* clima - layout 3 colunas (estilo "Local Weather") */
+.panel-clima-3col{ width:100%; height:100%; display:flex; align-items:stretch; gap:2.4vw; }
+.clima-coluna{ flex:1; display:flex; flex-direction:column; min-width:0; }
+.clima-coluna-titulo{ text-align:center; font-family:var(--font-mono); font-size:1.5vh; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin-bottom:1.6vh; }
+.clima-coluna-lista{ flex:1; display:flex; flex-direction:column; gap:1vh; background:var(--glass); backdrop-filter:blur(14px); border:1px solid var(--line); border-radius:18px; padding:1.6vh 1.6vw; justify-content:space-evenly; }
+.clima-linha{ display:flex; align-items:center; justify-content:space-between; gap:1vw; padding:0.6vh 0.4vw; }
+.clima-linha-label{ font-family:var(--font-display); font-weight:700; font-size:2vh; width:8vw; flex-shrink:0; }
+.clima-linha-icon{ width:3.4vh; height:3.4vh; flex-shrink:0; }
+.clima-linha-icon svg{ width:100%; height:100%; color:var(--cyan); }
+.clima-linha-direita{ text-align:right; flex:1; min-width:0; }
+.clima-linha-temp{ font-family:var(--font-display); font-weight:700; font-size:2.1vh; white-space:nowrap; }
+.clima-linha-desc{ font-size:1.25vh; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.clima-centro{ flex:1.1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
+.clima-centro-cidade{ font-family:var(--font-display); font-weight:800; font-size:3.2vh; text-shadow:0 2px 10px rgba(0,0,0,.4); margin-bottom:1vh; }
+.clima-centro-icon{ width:10vh; height:10vh; margin-bottom:1vh; }
+.clima-centro-icon svg{ width:100%; height:100%; color:#fff; filter:drop-shadow(0 4px 14px rgba(0,0,0,.4)); }
+.clima-centro-temp{ font-family:var(--font-display); font-weight:800; font-size:9vh; line-height:.9; color:#fff; text-shadow:0 4px 18px rgba(0,0,0,.4); }
+.clima-centro-desc{ font-size:2vh; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-top:.8vh; }
+
+/* tabela do brasileirão */
+.panel-tabela{ width:100%; height:100%; display:flex; flex-direction:column; }
+.tabela-titulo{ display:flex; align-items:center; gap:.8vh; font-family:var(--font-display); font-weight:800; font-size:2.6vh; margin-bottom:1.2vh; }
+.tabela-titulo svg{ width:2.6vh; height:2.6vh; color:var(--gold); }
+.tabela-wrap{ flex:1; background:var(--glass); backdrop-filter:blur(14px); border:1px solid var(--line); border-radius:16px; overflow:hidden; display:flex; flex-direction:column; }
+.tabela-cab{ display:flex; align-items:center; padding:0.6vh 1.4vw; font-family:var(--font-mono); font-size:1.1vh; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--line); flex-shrink:0; }
+.tabela-linhas{ flex:1; display:flex; flex-direction:column; justify-content:space-evenly; }
+.tabela-linha{ display:flex; align-items:center; padding:0.35vh 1.4vw; border-left:4px solid transparent; }
+.tabela-linha:nth-child(even){ background:rgba(255,255,255,0.03); }
+.tabela-linha.zona-libertadores{ border-left-color:var(--green); }
+.tabela-linha.zona-rebaixamento{ border-left-color:var(--coral); }
+.col-pos{ width:3.2vw; font-family:var(--font-mono); font-weight:700; font-size:1.6vh; color:var(--muted); flex-shrink:0; }
+.col-time{ flex:1; display:flex; align-items:center; gap:0.8vw; min-width:0; font-weight:600; font-size:1.7vh; }
+.col-escudo{ width:2.6vh; height:2.6vh; border-radius:50%; flex-shrink:0; object-fit:cover; background:rgba(255,255,255,0.1); }
+.col-escudo-fallback{ width:2.6vh; height:2.6vh; border-radius:50%; flex-shrink:0; background:var(--panel-2,rgba(255,255,255,0.12)); display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:800; font-size:1.3vh; }
+.col-time-nome{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.col-stat{ width:3.4vw; text-align:center; font-size:1.5vh; flex-shrink:0; }
+.col-pontos{ width:3.6vw; text-align:center; font-family:var(--font-display); font-weight:800; font-size:1.8vh; flex-shrink:0; }
+.col-forma{ width:9vw; display:flex; gap:0.35vw; justify-content:flex-end; flex-shrink:0; }
+.bola-forma{ width:1.5vh; height:1.5vh; border-radius:50%; }
+.bola-v{ background:var(--green); } .bola-e{ background:var(--muted); } .bola-d{ background:var(--coral); }
+.stat-value{ font-family:var(--font-display); font-weight:700; font-size:3.4vh; }
+
+/* cotações */
+.panel-cotacoes{ flex-direction:column; align-items:stretch; justify-content:center; gap:1.6vh; }
+.cotacao-row{ display:flex; align-items:center; justify-content:space-between; background:var(--glass); backdrop-filter:blur(14px); border:1px solid var(--line); border-radius:16px; padding:2.2vh 3vw; }
+.cotacao-nome{ display:flex; align-items:center; gap:1.4vw; }
+.cotacao-nome .icon-badge{ width:5.6vh; height:5.6vh; background:rgba(242,183,5,0.16); border-color:rgba(242,183,5,0.3); }
+.cotacao-nome .icon-badge svg{ width:2.8vh; height:2.8vh; color:var(--gold); }
+.cotacao-sigla{ font-family:var(--font-mono); font-weight:700; font-size:1.7vh; color:var(--gold); letter-spacing:.05em; }
+.cotacao-label{ font-size:2vh; color:var(--muted); }
+.cotacao-valor{ font-family:var(--font-display); font-weight:800; font-size:4.2vh; }
+.cotacao-var{ display:inline-flex; align-items:center; gap:.2vw; font-family:var(--font-mono); font-size:1.8vh; margin-left:1.4vw; }
+.cotacao-var svg{ width:1.8vh; height:1.8vh; }
+.var-up{ color:var(--green); } .var-down{ color:var(--coral); }
+
+/* aviso */
+.panel-aviso{ flex-direction:column; align-items:flex-start; justify-content:center; }
+.aviso-icon{ width:6vh; height:6vh; margin-bottom:1.6vh; background:rgba(242,183,5,0.18); border-color:rgba(242,183,5,0.35); }
+.aviso-icon svg{ width:3.2vh; height:3.2vh; color:var(--gold); }
+.aviso-titulo{ font-family:var(--font-display); font-weight:800; font-size:6.5vh; line-height:1.05; max-width:90%; color:#fff; text-shadow:0 2px 12px rgba(0,0,0,.35); }
+.aviso-texto{ font-size:2.6vh; max-width:75%; margin-top:2.2vh; line-height:1.4; }
+
+/* notícia manual / imagem em tela cheia */
+.panel-midia{ width:100%; height:100%; border-radius:24px; overflow:hidden; position:relative; border:1px solid var(--line); display:flex; align-items:flex-end; }
+.panel-midia img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.panel-midia .veu{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(10,17,32,0.05) 30%, rgba(6,10,20,0.92) 100%); }
+.panel-midia .conteudo{ position:relative; z-index:2; padding:4vh; }
+.midia-titulo{ font-family:var(--font-display); font-weight:800; font-size:5.5vh; line-height:1.08; text-shadow:0 2px 12px rgba(0,0,0,.5); max-width:85%; }
+.midia-resumo{ font-size:2.2vh; margin-top:1.4vh; max-width:80%; line-height:1.4; }
+.panel-midia.legenda-simples .veu{ background:linear-gradient(180deg, transparent 60%, rgba(6,10,20,0.85) 100%); }
+.badge-anuncio{ position:absolute; top:2.4vh; right:2.4vh; z-index:3; display:flex; align-items:center; gap:.5vw; background:var(--gold); color:#1a1305; font-family:var(--font-mono); font-weight:700; font-size:1.3vh; letter-spacing:.14em; text-transform:uppercase; padding:.8vh 1.4vh; border-radius:999px; }
+.badge-anuncio svg{ width:1.6vh; height:1.6vh; }
+.tag-cliente{ position:relative; z-index:2; display:inline-block; font-family:var(--font-mono); font-size:1.3vh; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:.8vh; }
+
+/* ---------- TICKER ---------- */
+.ticker{ position:relative; z-index:2; flex:0 0 auto; display:flex; align-items:stretch; border-top:1px solid var(--line); background:var(--glass-strong); backdrop-filter:blur(14px); height:7.4vh; }
+.ticker-label{ flex:0 0 auto; display:flex; align-items:center; gap:.6vw; padding:0 2vw; background:var(--gold); color:#1a1305; font-family:var(--font-display); font-weight:800; font-size:2.2vh; letter-spacing:.05em; }
+.ticker-label svg{ width:2.4vh; height:2.4vh; }
+.ticker-viewport{ flex:1; overflow:hidden; position:relative; display:flex; align-items:center; }
+.ticker-track{ display:inline-flex; white-space:nowrap; padding-left:100%; animation:scroll-left 60s linear infinite; font-size:2.1vh; font-weight:500; }
+.ticker-track span{ padding-right:5vw; }
+@keyframes scroll-left{ from{transform:translateX(0);} to{transform:translateX(-100%);} }
+.updated-badge{ display:none; }
+
+/* ---------- BOTÃO ADMIN ---------- */
+.btn-admin{ position:fixed; bottom:1.6vh; left:1.6vh; z-index:20; width:5vh; height:5vh; border-radius:50%; display:flex; align-items:center; justify-content:center; background:rgba(10,17,32,0.6); border:1px solid var(--line); opacity:.28; transition:opacity .2s ease; cursor:pointer; }
+.btn-admin:hover{ opacity:.9; }
+.btn-admin svg{ width:2.4vh; height:2.4vh; color:var(--ink); }
+
+/* ---------- TELA DE LOGIN (multi-cliente) ---------- */
+.tela-login{ position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center; background:radial-gradient(120% 140% at 15% 0%, #0d1626 0%, #0a1120 55%); }
+.tela-login.escondida{ display:none; }
+.login-card{ width:min(92vw, 420px); background:var(--glass-strong); backdrop-filter:blur(14px); border:1px solid var(--line); border-radius:20px; padding:4vh 4vh; }
+.login-marca{ display:flex; align-items:center; gap:1.2vh; margin-bottom:3vh; justify-content:center; }
+.login-marca .brand-mark{ width:4vh; height:4vh; }
+.login-titulo{ font-family:var(--font-display); font-weight:800; font-size:2.6vh; text-align:center; margin-bottom:.6vh; }
+.login-sub{ text-align:center; color:var(--muted); font-size:1.6vh; margin-bottom:3vh; }
+.login-campo{ display:block; margin-bottom:1.8vh; }
+.login-campo span{ display:block; font-size:1.5vh; color:var(--muted); margin-bottom:.6vh; }
+.login-campo input{ width:100%; border-radius:10px; padding:1.4vh 1.6vh; font-size:1.9vh; outline:none; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15); color:var(--ink); font-family:inherit; }
+.login-btn{ width:100%; font-weight:700; font-size:1.9vh; padding:1.4vh; border-radius:10px; background:var(--gold); color:#1a1305; border:none; cursor:pointer; margin-top:.6vh; }
+.login-erro{ color:var(--coral); font-size:1.5vh; margin-top:1.4vh; text-align:center; min-height:2vh; }
+.login-rodape{ margin-top:2.6vh; text-align:center; font-size:1.3vh; color:var(--muted); }
+
+/* ---------- OVERLAY ADMIN ---------- */
+.admin-overlay{ position:fixed; inset:0; z-index:50; background:rgba(6,10,20,0.97); display:none; flex-direction:column; font-family:var(--font-body); }
+.admin-overlay.aberto{ display:flex; }
+.admin-topo{ display:flex; align-items:center; justify-content:space-between; padding:2vh 2.4vw; border-bottom:1px solid var(--line); flex-shrink:0; }
+.admin-titulo{ font-family:var(--font-display); font-weight:700; font-size:2.6vh; display:flex; align-items:center; gap:.6vw; }
+.admin-titulo svg{ width:2.4vh; height:2.4vh; color:var(--gold); }
+.admin-fechar{ width:4.4vh; height:4.4vh; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+.admin-fechar:hover{ background:rgba(255,255,255,0.1); }
+.admin-fechar svg{ width:2.2vh; height:2.2vh; }
+.admin-abas{ display:flex; gap:1vh; padding:1.6vh 2.4vw; border-bottom:1px solid rgba(255,255,255,0.08); flex-shrink:0; overflow-x:auto; }
+.admin-aba{ display:flex; align-items:center; gap:.5vw; padding:1vh 1.8vw; border-radius:999px; font-size:1.7vh; font-weight:600; cursor:pointer; background:rgba(255,255,255,0.08); flex-shrink:0; white-space:nowrap; }
+.admin-aba svg{ width:1.8vh; height:1.8vh; }
+.admin-aba.ativa{ background:var(--gold); color:#1a1305; }
+.admin-corpo{ flex:1; overflow-y:auto; padding:3vh 2.4vw; max-width:70vh; width:100%; margin:0 auto; }
+.admin-corpo h3{ font-family:var(--font-display); font-weight:700; font-size:2.4vh; margin-bottom:2vh; }
+.campo{ display:block; margin-bottom:1.8vh; }
+.campo span{ display:block; font-size:1.6vh; color:var(--muted); margin-bottom:.6vh; }
+.campo input, .campo textarea{ width:100%; border-radius:10px; padding:1.4vh 1.6vh; font-size:1.9vh; outline:none; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15); color:var(--ink); font-family:inherit; }
+.campo textarea{ resize:vertical; min-height:8vh; }
+.btn-primario{ display:inline-flex; align-items:center; gap:.6vw; font-weight:700; font-size:1.8vh; padding:1.3vh 2.2vh; border-radius:10px; background:var(--gold); color:#1a1305; border:none; cursor:pointer; }
+.btn-primario svg{ width:2vh; height:2vh; }
+.lista-titulo{ font-family:var(--font-display); font-weight:700; font-size:2.2vh; margin:3.6vh 0 1.6vh; }
+.item-cadastrado{ display:flex; align-items:center; gap:1.4vh; background:var(--glass); border:1px solid var(--line); border-radius:14px; padding:1.4vh 1.6vh; margin-bottom:1.2vh; }
+.item-cadastrado img{ width:6vh; height:6vh; border-radius:8px; object-fit:cover; flex-shrink:0; }
+.item-texto{ flex:1; min-width:0; }
+.item-texto .t{ font-weight:600; font-size:1.9vh; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.item-texto .s{ font-size:1.6vh; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.item-excluir{ width:4vh; height:4vh; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; }
+.item-excluir:hover{ background:rgba(255,255,255,0.1); }
+.item-excluir svg{ width:2vh; height:2vh; color:var(--coral); }
+.texto-vazio{ font-size:1.7vh; color:var(--muted); }
+.admin-rodape{ padding:1.4vh 2.4vw; font-size:1.4vh; color:var(--muted); border-top:1px solid rgba(255,255,255,0.08); flex-shrink:0; }

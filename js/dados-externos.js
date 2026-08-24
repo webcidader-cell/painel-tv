@@ -62,7 +62,16 @@ async function buscarCotacoes(){
 }
 
 /* ---------- Jogos do dia (todos os campeonatos, via API-Football) ---------- */
-const LIMITE_JOGOS_EXIBIDOS = 30; // evita uma lista infinita em dias com muitos jogos no mundo todo
+const LIMITE_JOGOS_EXIBIDOS = 10; // mostra no máximo 10 jogos na tela
+function ehCompeticaoPrioritaria(liga, pais){
+  const nome = (liga||"").toLowerCase();
+  const paisLower = (pais||"").toLowerCase();
+  if(paisLower === "brazil" && (/\bserie a\b/.test(nome) || /\bserie b\b/.test(nome))) return true;
+  if(nome.includes("copa do brasil")) return true;
+  if(nome.includes("libertadores")) return true;
+  if(nome.includes("sudamericana") || nome.includes("sul-americana") || nome.includes("sulamericana")) return true;
+  return false;
+}
 async function buscarJogosDoDia(){
   const chaveApi = (CONFIG.apiFutebolKey || "").trim();
   if(!chaveApi){ dados.jogosDoDia = null; dados.erroJogos = false; return; } // sem chave configurada: painel mostra aviso amigável, não erro
@@ -71,6 +80,16 @@ async function buscarJogosDoDia(){
     const r = await fetch(`https://v3.football.api-sports.io/fixtures?date=${hoje}&timezone=America%2FSao_Paulo`, {
       headers: { "x-apisports-key": chaveApi }
     }).then(r=>r.json());
+
+    // a API-Football às vezes responde 200 OK com response:[] MAS com um erro real dentro de "errors"
+    // (chave inválida, plano sem acesso, limite diário estourado, etc). Sem checar isso, o painel
+    // mostraria "Sem jogos hoje" mesmo quando o problema é outro — então tratamos isso como erro de verdade.
+    const temErro = r.errors && (Array.isArray(r.errors) ? r.errors.length > 0 : Object.keys(r.errors).length > 0);
+    if(temErro){
+      const mensagem = Array.isArray(r.errors) ? r.errors.join(", ") : Object.values(r.errors).join(", ");
+      throw new Error("API-Football retornou erro: " + mensagem);
+    }
+
     const todos = (r.response || []).map(j => ({
       casa: j.teams.home.name,
       fora: j.teams.away.name,
@@ -83,14 +102,24 @@ async function buscarJogosDoDia(){
       liga: j.league?.name || "",
       pais: j.league?.country || ""
     }));
-    // prioriza jogos ao vivo primeiro, depois os que ainda vão começar, depois os encerrados
+    // prioriza: 1º competições brasileiras/sul-americanas de destaque, 2º jogos ao vivo, 3º os que ainda vão começar, por último os encerrados
     const pesoStatus = s => ["1H","2H","HT","ET","BT"].includes(s) ? 0 : (s==="NS" ? 1 : 2);
-    todos.sort((a,b)=> pesoStatus(a.status) - pesoStatus(b.status));
+    todos.sort((a,b)=>{
+      const prioA = ehCompeticaoPrioritaria(a.liga, a.pais) ? 0 : 1;
+      const prioB = ehCompeticaoPrioritaria(b.liga, b.pais) ? 0 : 1;
+      if(prioA !== prioB) return prioA - prioB;
+      return pesoStatus(a.status) - pesoStatus(b.status);
+    });
     dados.jogosDoDia = todos.slice(0, LIMITE_JOGOS_EXIBIDOS);
     dados.totalJogosDoDia = todos.length;
     dados.erroJogos = false;
     dados.ultimaAtualizacaoJogos = new Date();
-  }catch(e){ console.error("Erro ao buscar jogos do dia:", e); dados.erroJogos = true; }
+  }catch(e){
+    console.error("Erro ao buscar jogos do dia:", e);
+    dados.erroJogos = true;
+    dados.ultimoErroJogos = e.message || String(e);
+    registrarErroGlobal("Jogos do dia: " + (e.message || String(e)));
+  }
 }
 const VELOCIDADE_TICKER_PX_POR_SEGUNDO = 60; // menor = mais devagar, maior = mais rápido
 function ajustarVelocidadeTicker(){

@@ -317,6 +317,9 @@ function renderAbaStatus(){
     linhaStatus("Previsão do tempo", !dados.erroClima && !!dados.clima, dados.erroClima ? "Falhou na última tentativa" : "Atualizado " + tempoRelativo(dados.ultimaAtualizacaoClima)),
     linhaStatus("Cotações", !dados.erroCotacoes && !!dados.cotacoes, dados.erroCotacoes ? "Falhou na última tentativa" : "Atualizado " + tempoRelativo(dados.ultimaAtualizacaoCotacoes)),
     linhaStatus("Ticker de notícias", !dados.erroNoticias, dados.erroNoticias ? "Falhou na última tentativa" : "Atualizado " + tempoRelativo(dados.ultimaAtualizacaoNoticias)),
+    (CONFIG.apiFutebolKey||"").trim()
+      ? linhaStatus("Jogos do dia", !dados.erroJogos, dados.erroJogos ? (dados.ultimoErroJogos || "Falhou na última tentativa") : "Atualizado " + tempoRelativo(dados.ultimaAtualizacaoJogos) + (dados.jogosDoDia ? " · "+dados.totalJogosDoDia+" jogo(s) hoje" : ""))
+      : "",
   ].join("");
 
   const listaErros = ERROS_RECENTES.length

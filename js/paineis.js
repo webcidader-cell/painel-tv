@@ -103,9 +103,15 @@ function montarPainelJogosDoDia(){
     return `<div class="jogo-linha">
       <div class="jogo-liga">${escapeHtml(truncar(j.liga + (j.pais ? " · "+j.pais : ""), 34))}</div>
       <div class="jogo-partida">
-        <div class="jogo-time"><span class="jogo-time-nome">${escapeHtml(truncar(j.casa, 20))}</span></div>
+        <div class="jogo-time">
+          ${j.escudoCasa ? `<img class="jogo-escudo" src="${escapeAttr(j.escudoCasa)}" onerror="this.style.visibility='hidden'">` : ""}
+          <span class="jogo-time-nome">${escapeHtml(truncar(j.casa, 20))}</span>
+        </div>
         <div class="jogo-placar" style="color:${corStatus};">${escapeHtml(placar)}</div>
-        <div class="jogo-time jogo-time-direita"><span class="jogo-time-nome">${escapeHtml(truncar(j.fora, 20))}</span></div>
+        <div class="jogo-time jogo-time-direita">
+          <span class="jogo-time-nome">${escapeHtml(truncar(j.fora, 20))}</span>
+          ${j.escudoFora ? `<img class="jogo-escudo" src="${escapeAttr(j.escudoFora)}" onerror="this.style.visibility='hidden'">` : ""}
+        </div>
         <div class="jogo-status" style="color:${corStatus};">${emAndamento ? "● AO VIVO" : (encerrado ? "Encerrado" : j.horario)}</div>
       </div>
     </div>`;

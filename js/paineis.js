@@ -121,9 +121,16 @@ function montarPainelTabela(){
     </div>
   </div></div>`;
 }
+function tagMidia(url, tipoMidia){
+  const src = escapeAttr(url);
+  if(tipoMidia === "video"){
+    return `<video src="${src}" autoplay muted loop playsinline onerror="this.style.opacity='0.15'"></video>`;
+  }
+  return `<img src="${src}" onerror="this.style.opacity='0.15'">`;
+}
 function montarPainelImagem(im){
   return `<div class="panel"><div class="panel-midia legenda-simples">
-    <img src="${escapeAttr(im.url)}" onerror="this.style.opacity='0.15'">
+    ${tagMidia(im.url, im.tipoMidia)}
     <div class="veu"></div>
     ${im.legenda ? `<div class="conteudo" style="padding:3.2vh;"><div style="font-size:2.2vh;font-weight:500;">${escapeHtml(im.legenda)}</div></div>` : ""}
   </div></div>`;
@@ -155,7 +162,7 @@ function campanhasAtivasAgora(){ return CAMPANHAS.filter(campanhaEstaAtiva); }
 function montarPainelCampanha(c){
   return `<div class="panel"><div class="panel-midia legenda-simples">
     <div class="badge-anuncio"><i data-lucide="badge-dollar-sign"></i>Publicidade</div>
-    <img src="${escapeAttr(c.imagemUrl)}" onerror="this.style.opacity='0.15'">
+    ${tagMidia(c.imagemUrl, c.tipoMidia)}
     <div class="veu"></div>
     <div class="conteudo" style="padding:3.2vh;">
       <div class="tag-cliente">Anunciante</div>

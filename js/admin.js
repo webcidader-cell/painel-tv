@@ -94,32 +94,41 @@ function renderAbaNoticias(){
 
 function renderAbaImagens(){
   corpo.innerHTML = `
-    <h3>Nova imagem</h3>
-    <p class="texto-vazio" style="margin-bottom:1.8vh;">Cole o link de uma imagem já hospedada na internet (Google Drive público, Imgur, site da empresa). Não é possível enviar um arquivo direto por aqui.</p>
-    <label class="campo"><span>URL da imagem</span><input id="fImagemUrl" placeholder="https://..."></label>
+    <h3>Nova imagem ou vídeo</h3>
+    <p class="texto-vazio" style="margin-bottom:1.8vh;">Cole o link de uma imagem ou vídeo já hospedado na internet (Google Drive público, Imgur, YouTube não funciona — precisa ser um link direto de arquivo .mp4). Não é possível enviar um arquivo direto por aqui.</p>
+    <label class="campo"><span>Tipo</span>
+      <div class="dias-semana-seletor" id="fImagemTipo">
+        <label class="dia-chip"><input type="radio" name="fImagemTipoRadio" value="imagem" checked><span>🖼️ Imagem</span></label>
+        <label class="dia-chip"><input type="radio" name="fImagemTipoRadio" value="video"><span>🎬 Vídeo</span></label>
+      </div>
+    </label>
+    <label class="campo"><span>URL</span><input id="fImagemUrl" placeholder="https://..."></label>
     <label class="campo"><span>Legenda (opcional)</span><input id="fImagemLegenda" maxlength="120" placeholder="Ex: Feira livre todo sábado, das 6h às 12h"></label>
-    <button class="btn-primario" id="fImagemAdd"><i data-lucide="plus"></i>Adicionar imagem</button>
+    <button class="btn-primario" id="fImagemAdd"><i data-lucide="plus"></i>Adicionar</button>
     <div id="fImagemMsg"></div>
-    <div class="lista-titulo">Imagens cadastradas (${IMAGENS.length})</div>
+    <div class="lista-titulo">Cadastrados (${IMAGENS.length})</div>
     <div id="fImagemLista"></div>
   `;
   if(window.lucide) lucide.createIcons();
   document.getElementById("fImagemAdd").addEventListener("click", ()=>{
     const url = document.getElementById("fImagemUrl").value.trim();
-    if(!url){ mostrarMensagemFormulario("fImagemMsg", "Cole a URL da imagem antes de adicionar.", "erro"); return; }
+    if(!url){ mostrarMensagemFormulario("fImagemMsg", "Cole a URL antes de adicionar.", "erro"); return; }
     if(!urlValida(url)){ mostrarMensagemFormulario("fImagemMsg", "Essa URL parece inválida. Cole um link completo (começando com https://).", "erro"); return; }
     const legenda = document.getElementById("fImagemLegenda").value.trim();
-    IMAGENS.push({ id:gerarId(), url, legenda });
+    const tipoMidia = document.querySelector('input[name="fImagemTipoRadio"]:checked').value;
+    IMAGENS.push({ id:gerarId(), url, legenda, tipoMidia });
     salvarDados(CHAVES.imagens, IMAGENS);
     reiniciarRotacao();
     renderAbaImagens();
   });
   const listaEl = document.getElementById("fImagemLista");
-  if(!IMAGENS.length){ listaEl.innerHTML = `<p class="texto-vazio">Nenhuma imagem cadastrada ainda.</p>`; return; }
+  if(!IMAGENS.length){ listaEl.innerHTML = `<p class="texto-vazio">Nada cadastrado ainda.</p>`; return; }
   listaEl.innerHTML = IMAGENS.map(im=>`
     <div class="item-cadastrado">
-      <img src="${escapeAttr(im.url)}" onerror="this.style.visibility='hidden'">
-      <div class="item-texto"><div class="t">${escapeHtml(im.legenda || "(sem legenda)")}</div></div>
+      ${im.tipoMidia === "video"
+        ? `<div class="icon-badge" style="width:6vh;height:6vh;flex-shrink:0;"><i data-lucide="film"></i></div>`
+        : `<img src="${escapeAttr(im.url)}" onerror="this.style.visibility='hidden'">`}
+      <div class="item-texto"><div class="t">${im.tipoMidia === "video" ? "🎬 " : ""}${escapeHtml(im.legenda || "(sem legenda)")}</div></div>
       <div class="item-excluir" data-id="${im.id}"><i data-lucide="trash-2"></i></div>
     </div>`).join("");
   listaEl.querySelectorAll(".item-excluir").forEach(b=>b.addEventListener("click", ()=>{
@@ -142,7 +151,13 @@ function renderAbaComerciais(){
     <h3>Nova campanha comercial</h3>
     <p class="texto-vazio" style="margin-bottom:1.8vh;">O banner só aparece na tela dentro do período, dos dias da semana e do horário cadastrados — funciona como uma programação automática de anúncios, igual sistemas de TV Indoor profissionais.</p>
     <label class="campo"><span>Nome do anunciante</span><input id="fCampCliente" maxlength="60" placeholder="Ex: Supermercado Central"></label>
-    <label class="campo"><span>URL do banner (imagem)</span><input id="fCampImagem" placeholder="https://..."></label>
+    <label class="campo"><span>Tipo de mídia do banner</span>
+      <div class="dias-semana-seletor" id="fCampTipo">
+        <label class="dia-chip"><input type="radio" name="fCampTipoRadio" value="imagem" checked><span>🖼️ Imagem</span></label>
+        <label class="dia-chip"><input type="radio" name="fCampTipoRadio" value="video"><span>🎬 Vídeo</span></label>
+      </div>
+    </label>
+    <label class="campo"><span>URL do banner (imagem ou vídeo .mp4)</span><input id="fCampImagem" placeholder="https://..."></label>
     <div style="display:flex; gap:1.6vh;">
       <label class="campo" style="flex:1;"><span>Início da campanha</span><input id="fCampDataInicio" type="date"></label>
       <label class="campo" style="flex:1;"><span>Fim da campanha</span><input id="fCampDataFim" type="date"></label>
@@ -174,7 +189,8 @@ function renderAbaComerciais(){
     const horaInicio = document.getElementById("fCampHoraInicio").value || "";
     const horaFim = document.getElementById("fCampHoraFim").value || "";
     const diasSemana = [...document.querySelectorAll('#fCampDias input:checked')].map(el=>Number(el.value));
-    const novaCampanha = { id:gerarId(), cliente, imagemUrl, dataInicio, dataFim, horaInicio, horaFim, diasSemana, exibicoes:0 };
+    const tipoMidia = document.querySelector('input[name="fCampTipoRadio"]:checked').value;
+    const novaCampanha = { id:gerarId(), cliente, imagemUrl, tipoMidia, dataInicio, dataFim, horaInicio, horaFim, diasSemana, exibicoes:0 };
     CAMPANHAS.push(novaCampanha);
     salvarCampanha(novaCampanha);
     reiniciarRotacao();
@@ -186,9 +202,11 @@ function renderAbaComerciais(){
     const ativa = campanhaEstaAtiva(c);
     const periodo = `${c.dataInicio||"?"} até ${c.dataFim||"sem data final"}` + (c.horaInicio && c.horaFim ? ` · ${c.horaInicio}–${c.horaFim}` : "");
     return `<div class="item-cadastrado">
-      <img src="${escapeAttr(c.imagemUrl)}" onerror="this.style.visibility='hidden'">
+      ${c.tipoMidia === "video"
+        ? `<div class="icon-badge" style="width:6vh;height:6vh;flex-shrink:0;"><i data-lucide="film"></i></div>`
+        : `<img src="${escapeAttr(c.imagemUrl)}" onerror="this.style.visibility='hidden'">`}
       <div class="item-texto">
-        <div class="t">${escapeHtml(c.cliente)} ${ativa ? '<span style="color:var(--green);font-size:1.4vh;">● no ar agora</span>' : '<span style="color:var(--muted);font-size:1.4vh;">● fora do período</span>'}</div>
+        <div class="t">${c.tipoMidia === "video" ? "🎬 " : ""}${escapeHtml(c.cliente)} ${ativa ? '<span style="color:var(--green);font-size:1.4vh;">● no ar agora</span>' : '<span style="color:var(--muted);font-size:1.4vh;">● fora do período</span>'}</div>
         <div class="s">${escapeHtml(periodo)} · ${escapeHtml(rotuloDiasSemana(c.diasSemana))} · exibido ${c.exibicoes||0}x</div>
       </div>
       <div class="item-excluir" data-id="${c.id}"><i data-lucide="trash-2"></i></div>

@@ -154,7 +154,7 @@ body{ color:var(--ink); font-family:var(--font-body); overflow:hidden; width:100
 
 /* notícia manual / imagem em tela cheia */
 .panel-midia{ width:100%; height:100%; border-radius:24px; overflow:hidden; position:relative; border:1px solid var(--line); display:flex; align-items:flex-end; }
-.panel-midia img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.panel-midia img, .panel-midia video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
 .panel-midia .veu{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(10,17,32,0.05) 30%, rgba(6,10,20,0.92) 100%); }
 .panel-midia .conteudo{ position:relative; z-index:2; padding:4vh; }
 .midia-titulo{ font-family:var(--font-display); font-weight:800; font-size:5.5vh; line-height:1.08; text-shadow:0 2px 12px rgba(0,0,0,.5); max-width:85%; }

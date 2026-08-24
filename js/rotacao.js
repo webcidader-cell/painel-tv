@@ -30,9 +30,12 @@ function listaBaseDePaineis(){
 }
 function listaDePaineis(){
   const base = listaBaseDePaineis();
-  let alterou = false;
-  base.forEach(item=>{ if(garantirEntradaPlaylist(chavePlaylist(item.tipo, item.id))) alterou = true; });
-  if(alterou) salvarDados(CHAVES.playlist, PLAYLIST); // salva silenciosamente as entradas novas criadas agora
+  // Preenche em memória (pra renderizar certo na hora), mas NÃO salva na nuvem daqui —
+  // salvar aqui poderia sobrescrever uma ordem já customizada, caso essa função rode
+  // antes da primeira resposta real da sincronização em nuvem chegar (corrida de dados
+  // no carregamento da página). O registro definitivo/salvo acontece quando o admin
+  // abre a aba Playlist (renderAbaPlaylist), que é uma ação deliberada do usuário.
+  base.forEach(item=>{ garantirEntradaPlaylist(chavePlaylist(item.tipo, item.id)); });
 
   return base
     .map(item=>{

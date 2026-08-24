@@ -20,6 +20,7 @@ function ativarEscutaDaNuvem(){
     CONFIG = { ...CONFIG_PADRAO, ...v };
     gravarLocal(CHAVES.config, CONFIG);
     document.getElementById("nomePainel").textContent = CONFIG.nomePainel;
+    atualizarLogoTopbar();
     reiniciarRotacaoComDebounce();
   });
   registrar("avisos", snap=>{

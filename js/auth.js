@@ -55,6 +55,7 @@ function iniciarComAutenticacao(){
       AVISOS = []; NOTICIAS_MANUAIS = []; IMAGENS = []; CAMPANHAS = []; PLAYLIST = {};
       [CHAVES.config, CHAVES.avisos, CHAVES.noticias, CHAVES.imagens, CHAVES.campanhas, CHAVES.playlist].forEach(k=>{ try{ localStorage.removeItem(k); }catch{} });
       document.getElementById("nomePainel").textContent = CONFIG.nomePainel;
+      atualizarLogoTopbar();
       document.getElementById("telaLogin").classList.add("escondida");
       document.getElementById("tvApp").style.display = "";
       document.getElementById("btnAdmin").style.display = "";

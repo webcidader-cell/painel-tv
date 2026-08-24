@@ -6,7 +6,8 @@ const CONFIG_PADRAO = {
   cidade: "Lícinio de Almeida, BA",
   feedNoticias: "https://g1.globo.com/rss/g1/",
   tempoRotacaoSegundos: 12,
-  apiFutebolKey: ""
+  apiFutebolKey: "",
+  logoUrl: ""
 };
 
 /* ============================================================
@@ -53,3 +54,17 @@ let CAMPANHAS = lerLocal(CHAVES.campanhas, []);
 let PLAYLIST = lerLocal(CHAVES.playlist, {}); // { "tipo:id": {ativo, ordem, duracao} }
 
 document.getElementById("nomePainel").textContent = CONFIG.nomePainel;
+
+// Troca o ícone genérico do topo pela logo do cliente, se ele tiver cadastrado uma.
+// Se a imagem falhar ao carregar, volta pro ícone padrão sozinho (não quebra o layout).
+function atualizarLogoTopbar(){
+  const el = document.getElementById("brandMark");
+  if(!el) return;
+  const url = (CONFIG.logoUrl||"").trim();
+  if(url){
+    el.innerHTML = `<img src="${String(url).replace(/"/g,"&quot;")}" style="width:100%;height:100%;object-fit:contain;" onerror="this.parentElement.innerHTML='<i data-lucide=monitor-play></i>'; if(window.lucide) lucide.createIcons();">`;
+  } else {
+    el.innerHTML = `<i data-lucide="monitor-play"></i>`;
+    if(window.lucide) lucide.createIcons();
+  }
+}

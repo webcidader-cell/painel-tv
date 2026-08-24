@@ -376,6 +376,10 @@ function renderAbaConfig(){
   corpo.innerHTML = `
     <h3>Configurações gerais</h3>
     <label class="campo"><span>Nome do painel</span><input id="fCfgNome" maxlength="40" value="${escapeAttr(CONFIG.nomePainel)}"></label>
+    <label class="campo">
+      <span>URL da logo (opcional — substitui o ícone padrão no topo)</span>
+      <input id="fCfgLogo" value="${escapeAttr(CONFIG.logoUrl||"")}" placeholder="https://...">
+    </label>
     <label class="campo"><span>Cidade (previsão do tempo)</span><input id="fCfgCidade" value="${escapeAttr(CONFIG.cidade)}" placeholder="Ex: Lícinio de Almeida, BA"></label>
     <label class="campo"><span>Feed RSS de notícias</span><input id="fCfgFeed" value="${escapeAttr(CONFIG.feedNoticias)}"></label>
     <label class="campo"><span>Tempo de cada tela (segundos)</span><input id="fCfgTempo" type="number" min="5" max="60" value="${CONFIG.tempoRotacaoSegundos}"></label>
@@ -385,16 +389,21 @@ function renderAbaConfig(){
     </label>
     <p class="texto-vazio" style="margin-top:-1vh;">Crie uma chave grátis em <a href="https://dashboard.api-football.com/register" target="_blank" style="color:var(--gold);">dashboard.api-football.com</a> (sem cartão). O plano gratuito permite ~100 consultas por dia — o painel já atualiza num intervalo seguro pra não estourar.</p>
     <button class="btn-primario" id="fCfgSalvar"><i data-lucide="save"></i>Salvar configurações</button>
+    <div id="fCfgMsg"></div>
   `;
   if(window.lucide) lucide.createIcons();
   document.getElementById("fCfgSalvar").addEventListener("click", async ()=>{
     CONFIG.nomePainel = document.getElementById("fCfgNome").value.trim() || CONFIG_PADRAO.nomePainel;
+    const logoUrl = document.getElementById("fCfgLogo").value.trim();
+    if(logoUrl && !urlValida(logoUrl)){ mostrarMensagemFormulario("fCfgMsg", "A URL da logo parece inválida.", "erro"); return; }
+    CONFIG.logoUrl = logoUrl;
     CONFIG.cidade = document.getElementById("fCfgCidade").value.trim() || CONFIG_PADRAO.cidade;
     CONFIG.feedNoticias = document.getElementById("fCfgFeed").value.trim() || CONFIG_PADRAO.feedNoticias;
     CONFIG.tempoRotacaoSegundos = Number(document.getElementById("fCfgTempo").value) || 12;
     CONFIG.apiFutebolKey = document.getElementById("fCfgApiFutebol").value.trim();
     salvarDados(CHAVES.config, CONFIG);
     document.getElementById("nomePainel").textContent = CONFIG.nomePainel;
+    atualizarLogoTopbar();
     await Promise.all([ buscarClima(), buscarNoticias(), buscarJogosDoDia() ]);
     reiniciarRotacao();
     atualizarBadge();

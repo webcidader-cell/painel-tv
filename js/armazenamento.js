@@ -5,13 +5,14 @@ const CONFIG_PADRAO = {
   nomePainel: "Painel Informativo",
   cidade: "Lícinio de Almeida, BA",
   feedNoticias: "https://g1.globo.com/rss/g1/",
-  tempoRotacaoSegundos: 12
+  tempoRotacaoSegundos: 12,
+  apiFutebolKey: ""
 };
 
 /* ============================================================
    ARMAZENAMENTO LOCAL (fica salvo no navegador desta TV)
    ============================================================ */
-const CHAVES = { config:"painelTV:config", avisos:"painelTV:avisos", noticias:"painelTV:noticias", imagens:"painelTV:imagens", campanhas:"painelTV:campanhas", tabela:"painelTV:tabela", playlist:"painelTV:playlist" };
+const CHAVES = { config:"painelTV:config", avisos:"painelTV:avisos", noticias:"painelTV:noticias", imagens:"painelTV:imagens", campanhas:"painelTV:campanhas", playlist:"painelTV:playlist" };
 function lerLocal(chave, padrao){
   try{ const chaveFinal = UID_ATUAL ? chave+":"+UID_ATUAL : chave; const v = localStorage.getItem(chaveFinal); return v ? JSON.parse(v) : padrao; }catch{ return padrao; }
 }
@@ -49,7 +50,6 @@ let AVISOS = lerLocal(CHAVES.avisos, [
 let NOTICIAS_MANUAIS = lerLocal(CHAVES.noticias, []);
 let IMAGENS = lerLocal(CHAVES.imagens, []);
 let CAMPANHAS = lerLocal(CHAVES.campanhas, []);
-let TABELA = lerLocal(CHAVES.tabela, []);
 let PLAYLIST = lerLocal(CHAVES.playlist, {}); // { "tipo:id": {ativo, ordem, duracao} }
 
 document.getElementById("nomePainel").textContent = CONFIG.nomePainel;

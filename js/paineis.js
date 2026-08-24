@@ -78,46 +78,39 @@ function iniciais(nome){
   const partes = String(nome||"").trim().split(/\s+/);
   return (partes[0]?.[0]||"") + (partes[1]?.[0]||"");
 }
-function montarPainelTabela(){
-  if(!TABELA.length) return `<div class="panel panel-aviso"><div class="eyebrow"><i data-lucide="trophy"></i>Brasileirão</div><div class="aviso-titulo" style="font-size:4.5vh;">Tabela ainda não cadastrada</div><div class="aviso-texto">Cadastre os times na aba "Tabela" do painel de administração.</div></div>`;
-  const ordenada = [...TABELA].sort((a,b)=> (b.pontos||0) - (a.pontos||0));
-  const total = ordenada.length;
-  const linhas = ordenada.map((t,i)=>{
-    const pos = i+1;
-    const zona = pos<=6 ? "zona-libertadores" : (pos > total-4 ? "zona-rebaixamento" : "");
-    const escudo = t.escudoUrl
-      ? `<img class="col-escudo" src="${escapeAttr(t.escudoUrl)}" onerror="this.outerHTML='<div class=col-escudo-fallback>${escapeHtml(iniciais(t.nome))}</div>'">`
-      : `<div class="col-escudo-fallback">${escapeHtml(iniciais(t.nome))}</div>`;
-    const forma = String(t.forma||"").split(",").map(r=>r.trim().toUpperCase()).filter(Boolean).slice(-5)
-      .map(r=> `<div class="bola-forma ${r==='V'?'bola-v':r==='E'?'bola-e':'bola-d'}"></div>`).join("");
-    const saldo = (t.golsPro||0) - (t.golsContra||0);
-    return `<div class="tabela-linha ${zona}">
-      <div class="col-pos">${pos}</div>
-      <div class="col-time">${escudo}<span class="col-time-nome">${escapeHtml(truncar(t.nome, 40))}</span></div>
-      <div class="col-pontos">${t.pontos||0}</div>
-      <div class="col-stat">${t.jogos||0}</div>
-      <div class="col-stat">${t.vitorias||0}</div>
-      <div class="col-stat">${t.empates||0}</div>
-      <div class="col-stat">${t.derrotas||0}</div>
-      <div class="col-stat">${saldo>0?'+':''}${saldo}</div>
-      <div class="col-forma">${forma}</div>
+function rotuloStatusJogo(status){
+  const mapa = { NS:"Não começou", "1H":"1º tempo", HT:"Intervalo", "2H":"2º tempo", ET:"Prorrogação", FT:"Encerrado", AET:"Encerrado (prorrogação)", PEN:"Pênaltis", PST:"Adiado", CANC:"Cancelado" };
+  return mapa[status] || status;
+}
+function montarPainelJogosDoDia(){
+  if(!(CONFIG.apiFutebolKey||"").trim()){
+    return `<div class="panel panel-aviso"><div class="eyebrow"><i data-lucide="calendar-days"></i>Brasileirão</div><div class="aviso-titulo" style="font-size:4.5vh;">Jogos do dia não configurado</div><div class="aviso-texto">Cadastre uma chave gratuita da API-Football em Configurações para ativar essa tela.</div></div>`;
+  }
+  if(dados.erroJogos){
+    return `<div class="panel panel-aviso"><div class="eyebrow"><i data-lucide="wifi-off"></i>Brasileirão</div><div class="aviso-titulo" style="font-size:4.5vh;">Não foi possível carregar os jogos</div><div class="aviso-texto">Verifique a internet da TV ou se a chave da API-Football ainda é válida.</div></div>`;
+  }
+  if(dados.jogosDoDia === null){
+    return `<div class="panel panel-aviso"><div class="eyebrow"><i data-lucide="calendar-days"></i>Brasileirão</div><div class="aviso-titulo">Carregando jogos do dia...</div></div>`;
+  }
+  if(!dados.jogosDoDia.length){
+    return `<div class="panel panel-aviso"><div class="eyebrow"><i data-lucide="calendar-days"></i>Brasileirão</div><div class="aviso-titulo" style="font-size:4.5vh;">Sem jogos hoje</div><div class="aviso-texto">Não há partidas do Brasileirão marcadas para hoje.</div></div>`;
+  }
+  const linhas = dados.jogosDoDia.map(j=>{
+    const emAndamento = ["1H","2H","HT","ET"].includes(j.status);
+    const encerrado = ["FT","AET","PEN"].includes(j.status);
+    const placar = (encerrado || emAndamento) ? `${j.golsCasa ?? 0} — ${j.golsFora ?? 0}` : "×";
+    const corStatus = emAndamento ? "var(--green)" : (encerrado ? "var(--muted)" : "var(--gold)");
+    return `<div class="jogo-linha">
+      <div class="jogo-time"><span class="jogo-time-nome">${escapeHtml(truncar(j.casa, 22))}</span></div>
+      <div class="jogo-placar" style="color:${corStatus};">${escapeHtml(placar)}</div>
+      <div class="jogo-time jogo-time-direita"><span class="jogo-time-nome">${escapeHtml(truncar(j.fora, 22))}</span></div>
+      <div class="jogo-status" style="color:${corStatus};">${emAndamento ? "● AO VIVO" : (encerrado ? "Encerrado" : j.horario)}</div>
     </div>`;
   }).join("");
   return `<div class="panel"><div class="panel-tabela">
-    <div class="tabela-titulo"><i data-lucide="trophy"></i>Classificação — Brasileirão</div>
-    <div class="tabela-wrap">
-      <div class="tabela-cab">
-        <div class="col-pos">#</div>
-        <div class="col-time">Time</div>
-        <div class="col-pontos">Pts</div>
-        <div class="col-stat">J</div>
-        <div class="col-stat">V</div>
-        <div class="col-stat">E</div>
-        <div class="col-stat">D</div>
-        <div class="col-stat">SG</div>
-        <div class="col-forma">Últimos 5</div>
-      </div>
-      <div class="tabela-linhas">${linhas}</div>
+    <div class="tabela-titulo"><i data-lucide="calendar-days"></i>Jogos do dia — Brasileirão</div>
+    <div class="tabela-wrap" style="padding:1vh 0;">
+      <div class="jogos-lista">${linhas}</div>
     </div>
   </div></div>`;
 }

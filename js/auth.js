@@ -52,8 +52,8 @@ function iniciarComAutenticacao(){
       UID_ATUAL = user.uid;
       // zera qualquer dado em memória de uma sessão/cliente anterior neste mesmo navegador
       CONFIG = { ...CONFIG_PADRAO };
-      AVISOS = []; NOTICIAS_MANUAIS = []; IMAGENS = []; CAMPANHAS = []; TABELA = []; PLAYLIST = {};
-      [CHAVES.config, CHAVES.avisos, CHAVES.noticias, CHAVES.imagens, CHAVES.campanhas, CHAVES.tabela, CHAVES.playlist].forEach(k=>{ try{ localStorage.removeItem(k); }catch{} });
+      AVISOS = []; NOTICIAS_MANUAIS = []; IMAGENS = []; CAMPANHAS = []; PLAYLIST = {};
+      [CHAVES.config, CHAVES.avisos, CHAVES.noticias, CHAVES.imagens, CHAVES.campanhas, CHAVES.playlist].forEach(k=>{ try{ localStorage.removeItem(k); }catch{} });
       document.getElementById("nomePainel").textContent = CONFIG.nomePainel;
       document.getElementById("telaLogin").classList.add("escondida");
       document.getElementById("tvApp").style.display = "";

@@ -4,7 +4,7 @@
 async function iniciar(){
   if(window.lucide) lucide.createIcons();
   aplicarCenario(1, true);
-  await Promise.all([ buscarClima(), buscarCotacoes(), buscarNoticias() ]);
+  await Promise.all([ buscarClima(), buscarCotacoes(), buscarNoticias(), buscarJogosDoDia() ]);
   reiniciarRotacao();
   atualizarBadge();
   if(window.lucide) lucide.createIcons();
@@ -12,6 +12,7 @@ async function iniciar(){
   setInterval(async ()=>{ await buscarClima(); renderizarPainelAtual(); atualizarBadge(); }, CONFIG.atualizarClimaMinutos ? CONFIG.atualizarClimaMinutos*60*1000 : 15*60*1000);
   setInterval(async ()=>{ await buscarCotacoes(); renderizarPainelAtual(); atualizarBadge(); }, 5*60*1000);
   setInterval(buscarNoticias, 10*60*1000);
+  setInterval(async ()=>{ await buscarJogosDoDia(); renderizarPainelAtual(); }, 20*60*1000); // 20 min: seguro dentro do limite de ~100 consultas/dia do plano grátis
 }
 function iniciarApp(){
   iniciar();

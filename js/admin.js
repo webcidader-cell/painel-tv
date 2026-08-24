@@ -35,7 +35,6 @@ function renderAba(){
   if(abaAtual==="noticias") renderAbaNoticias();
   else if(abaAtual==="imagens") renderAbaImagens();
   else if(abaAtual==="comerciais") renderAbaComerciais();
-  else if(abaAtual==="tabela") renderAbaTabela();
   else if(abaAtual==="playlist") renderAbaPlaylist();
   else if(abaAtual==="status") renderAbaStatus();
   else if(abaAtual==="avisos") renderAbaAvisos();
@@ -226,7 +225,7 @@ function itensPlaylistDisponiveis(){
     {tipo:"clima", id:null, label:"Previsão do tempo", icone:"cloud"},
     {tipo:"cotacoes", id:null, label:"Cotações do mercado", icone:"landmark"}
   ];
-  if(TABELA.length) itens.push({tipo:"tabela", id:null, label:"Tabela do Brasileirão", icone:"trophy"});
+  if((CONFIG.apiFutebolKey||"").trim()) itens.push({tipo:"jogosDoDia", id:null, label:"Jogos do dia (Brasileirão)", icone:"calendar-days"});
   AVISOS.forEach(a=>itens.push({tipo:"aviso", id:a.id, label:"Aviso: "+(a.titulo||"(sem título)"), icone:"megaphone"}));
   NOTICIAS_MANUAIS.forEach(n=>itens.push({tipo:"noticiaManual", id:n.id, label:"Notícia: "+(n.titulo||"(sem título)"), icone:"newspaper"}));
   IMAGENS.forEach(im=>itens.push({tipo:"imagem", id:im.id, label:"Imagem: "+(im.legenda||"(sem legenda)"), icone:"image"}));
@@ -300,66 +299,6 @@ function renderAbaPlaylist(){
       renderAbaPlaylist();
     }));
   }
-  if(window.lucide) lucide.createIcons();
-}
-
-function renderAbaTabela(){
-  corpo.innerHTML = `
-    <h3>Novo time na tabela</h3>
-    <p class="texto-vazio" style="margin-bottom:1.8vh;">A posição é calculada automaticamente pelos pontos — não precisa reordenar manualmente. Atualize os números depois de cada rodada.</p>
-    <label class="campo"><span>Nome do time</span><input id="fTimeNome" maxlength="40" placeholder="Ex: Palmeiras"></label>
-    <label class="campo"><span>URL do escudo (opcional)</span><input id="fTimeEscudo" placeholder="https://..."></label>
-    <div style="display:flex; gap:1vh; flex-wrap:wrap;">
-      <label class="campo" style="flex:1; min-width:7vw;"><span>Pontos</span><input id="fTimePontos" type="number" min="0"></label>
-      <label class="campo" style="flex:1; min-width:7vw;"><span>Jogos</span><input id="fTimeJogos" type="number" min="0"></label>
-      <label class="campo" style="flex:1; min-width:7vw;"><span>Vitórias</span><input id="fTimeVitorias" type="number" min="0"></label>
-      <label class="campo" style="flex:1; min-width:7vw;"><span>Empates</span><input id="fTimeEmpates" type="number" min="0"></label>
-      <label class="campo" style="flex:1; min-width:7vw;"><span>Derrotas</span><input id="fTimeDerrotas" type="number" min="0"></label>
-    </div>
-    <div style="display:flex; gap:1vh;">
-      <label class="campo" style="flex:1;"><span>Gols pró</span><input id="fTimeGolsPro" type="number" min="0"></label>
-      <label class="campo" style="flex:1;"><span>Gols contra</span><input id="fTimeGolsContra" type="number" min="0"></label>
-    </div>
-    <label class="campo"><span>Últimos 5 jogos (separado por vírgula: V = vitória, E = empate, D = derrota)</span><input id="fTimeForma" placeholder="Ex: V,V,E,D,V"></label>
-    <button class="btn-primario" id="fTimeAdd"><i data-lucide="plus"></i>Adicionar time</button>
-    <div id="fTimeMsg"></div>
-    <div class="lista-titulo">Times cadastrados (${TABELA.length})</div>
-    <div id="fTimeLista"></div>
-  `;
-  if(window.lucide) lucide.createIcons();
-  document.getElementById("fTimeAdd").addEventListener("click", ()=>{
-    const nome = document.getElementById("fTimeNome").value.trim();
-    if(!nome){ mostrarMensagemFormulario("fTimeMsg", "Preencha o nome do time.", "erro"); return; }
-    const escudoUrl = document.getElementById("fTimeEscudo").value.trim();
-    if(!urlValida(escudoUrl)){ mostrarMensagemFormulario("fTimeMsg", "A URL do escudo parece inválida. Cole um link completo (começando com https://).", "erro"); return; }
-    const num = id => Number(document.getElementById(id).value) || 0;
-    TABELA.push({
-      id: gerarId(), nome,
-      escudoUrl,
-      pontos: num("fTimePontos"), jogos: num("fTimeJogos"),
-      vitorias: num("fTimeVitorias"), empates: num("fTimeEmpates"), derrotas: num("fTimeDerrotas"),
-      golsPro: num("fTimeGolsPro"), golsContra: num("fTimeGolsContra"),
-      forma: document.getElementById("fTimeForma").value.trim()
-    });
-    salvarDados(CHAVES.tabela, TABELA);
-    reiniciarRotacao();
-    renderAbaTabela();
-  });
-  const listaEl = document.getElementById("fTimeLista");
-  if(!TABELA.length){ listaEl.innerHTML = `<p class="texto-vazio">Nenhum time cadastrado ainda.</p>`; return; }
-  const ordenada = [...TABELA].sort((a,b)=> (b.pontos||0)-(a.pontos||0));
-  listaEl.innerHTML = ordenada.map((t,i)=>`
-    <div class="item-cadastrado">
-      ${t.escudoUrl ? `<img src="${escapeAttr(t.escudoUrl)}" onerror="this.style.visibility='hidden'">` : ""}
-      <div class="item-texto"><div class="t">${i+1}º — ${escapeHtml(t.nome)}</div><div class="s">${t.pontos||0} pts · ${t.jogos||0} jogos · saldo ${(t.golsPro||0)-(t.golsContra||0)}</div></div>
-      <div class="item-excluir" data-id="${t.id}"><i data-lucide="trash-2"></i></div>
-    </div>`).join("");
-  listaEl.querySelectorAll(".item-excluir").forEach(b=>b.addEventListener("click", ()=>{
-    TABELA = TABELA.filter(t=>t.id!==b.dataset.id);
-    salvarDados(CHAVES.tabela, TABELA);
-    reiniciarRotacao();
-    renderAbaTabela();
-  }));
   if(window.lucide) lucide.createIcons();
 }
 
@@ -437,6 +376,11 @@ function renderAbaConfig(){
     <label class="campo"><span>Cidade (previsão do tempo)</span><input id="fCfgCidade" value="${escapeAttr(CONFIG.cidade)}" placeholder="Ex: Lícinio de Almeida, BA"></label>
     <label class="campo"><span>Feed RSS de notícias</span><input id="fCfgFeed" value="${escapeAttr(CONFIG.feedNoticias)}"></label>
     <label class="campo"><span>Tempo de cada tela (segundos)</span><input id="fCfgTempo" type="number" min="5" max="60" value="${CONFIG.tempoRotacaoSegundos}"></label>
+    <label class="campo">
+      <span>Chave da API-Football (opcional, ativa a tela "Jogos do dia")</span>
+      <input id="fCfgApiFutebol" value="${escapeAttr(CONFIG.apiFutebolKey||"")}" placeholder="Cole aqui a chave gratuita da api-football.com">
+    </label>
+    <p class="texto-vazio" style="margin-top:-1vh;">Crie uma chave grátis em <a href="https://dashboard.api-football.com/register" target="_blank" style="color:var(--gold);">dashboard.api-football.com</a> (sem cartão). O plano gratuito permite ~100 consultas por dia — o painel já atualiza num intervalo seguro pra não estourar.</p>
     <button class="btn-primario" id="fCfgSalvar"><i data-lucide="save"></i>Salvar configurações</button>
   `;
   if(window.lucide) lucide.createIcons();
@@ -445,9 +389,10 @@ function renderAbaConfig(){
     CONFIG.cidade = document.getElementById("fCfgCidade").value.trim() || CONFIG_PADRAO.cidade;
     CONFIG.feedNoticias = document.getElementById("fCfgFeed").value.trim() || CONFIG_PADRAO.feedNoticias;
     CONFIG.tempoRotacaoSegundos = Number(document.getElementById("fCfgTempo").value) || 12;
+    CONFIG.apiFutebolKey = document.getElementById("fCfgApiFutebol").value.trim();
     salvarDados(CHAVES.config, CONFIG);
     document.getElementById("nomePainel").textContent = CONFIG.nomePainel;
-    await Promise.all([ buscarClima(), buscarNoticias() ]);
+    await Promise.all([ buscarClima(), buscarNoticias(), buscarJogosDoDia() ]);
     reiniciarRotacao();
     atualizarBadge();
   });

@@ -1,7 +1,7 @@
 /* ============================================================
    DADOS AO VIVO
    ============================================================ */
-const dados = { clima:null, cotacoes:null, erroClima:false, erroCotacoes:false, erroNoticias:false, ultimaAtualizacaoClima:null, ultimaAtualizacaoCotacoes:null, ultimaAtualizacaoNoticias:null };
+const dados = { clima:null, cotacoes:null, jogosDoDia:null, erroClima:false, erroCotacoes:false, erroNoticias:false, erroJogos:false, ultimaAtualizacaoClima:null, ultimaAtualizacaoCotacoes:null, ultimaAtualizacaoNoticias:null, ultimaAtualizacaoJogos:null };
 
 async function buscarClima(){
   try{
@@ -59,6 +59,47 @@ async function buscarCotacoes(){
     dados.erroCotacoes = false;
     dados.ultimaAtualizacaoCotacoes = new Date();
   }catch(e){ console.error("Erro ao buscar cotações:", e); dados.erroCotacoes = true; }
+}
+
+/* ---------- Jogos do dia (Brasileirão, via API-Football) ---------- */
+let idLigaBrasileiraoCache = null;
+async function resolverIdLigaBrasileirao(chaveApi){
+  if(idLigaBrasileiraoCache) return idLigaBrasileiraoCache;
+  const r = await fetch("https://v3.football.api-sports.io/leagues?search=Brasileiro&country=Brazil", {
+    headers: { "x-apisports-key": chaveApi }
+  }).then(r=>r.json());
+  const lista = r && r.response ? r.response : [];
+  // procura a Série A (nome mais comum: "Serie A" para o país Brazil)
+  const encontrada = lista.find(l => l.league && /serie a/i.test(l.league.name) && !/serie a1|women/i.test(l.league.name))
+                   || lista.find(l => l.league && /brasileiro/i.test(l.league.name));
+  if(!encontrada) throw new Error("Não encontrei a liga do Brasileirão nessa conta da API-Football.");
+  idLigaBrasileiraoCache = encontrada.league.id;
+  return idLigaBrasileiraoCache;
+}
+async function buscarJogosDoDia(){
+  const chaveApi = (CONFIG.apiFutebolKey || "").trim();
+  if(!chaveApi){ dados.jogosDoDia = null; dados.erroJogos = false; return; } // sem chave configurada: painel mostra aviso amigável, não erro
+  try{
+    const idLiga = await resolverIdLigaBrasileirao(chaveApi);
+    const hoje = dataHojeStr();
+    const ano = new Date().getFullYear();
+    const r = await fetch(`https://v3.football.api-sports.io/fixtures?date=${hoje}&league=${idLiga}&season=${ano}&timezone=America%2FSao_Paulo`, {
+      headers: { "x-apisports-key": chaveApi }
+    }).then(r=>r.json());
+    const jogos = (r.response || []).map(j => ({
+      casa: j.teams.home.name,
+      fora: j.teams.away.name,
+      escudoCasa: j.teams.home.logo,
+      escudoFora: j.teams.away.logo,
+      golsCasa: j.goals.home,
+      golsFora: j.goals.away,
+      status: j.fixture.status.short, // NS=não começou, 1H/2H/HT=em andamento, FT=encerrado
+      horario: new Date(j.fixture.date).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})
+    }));
+    dados.jogosDoDia = jogos;
+    dados.erroJogos = false;
+    dados.ultimaAtualizacaoJogos = new Date();
+  }catch(e){ console.error("Erro ao buscar jogos do dia:", e); dados.erroJogos = true; }
 }
 const VELOCIDADE_TICKER_PX_POR_SEGUNDO = 60; // menor = mais devagar, maior = mais rápido
 function ajustarVelocidadeTicker(){

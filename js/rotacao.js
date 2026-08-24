@@ -21,7 +21,7 @@ function garantirEntradaPlaylist(chave){
 
 function listaBaseDePaineis(){
   const lista = [ {tipo:"clima", html:montarPainelClima()}, {tipo:"cotacoes", html:montarPainelCotacoes()} ];
-  if(TABELA.length) lista.push({tipo:"tabela", html:montarPainelTabela()});
+  lista.push({tipo:"jogosDoDia", html:montarPainelJogosDoDia()});
   AVISOS.forEach(a=>lista.push({tipo:"aviso", id:a.id, html:montarPainelAviso(a)}));
   NOTICIAS_MANUAIS.forEach(n=>lista.push({tipo:"noticiaManual", id:n.id, html:montarPainelNoticiaManual(n)}));
   IMAGENS.forEach(im=>lista.push({tipo:"imagem", id:im.id, html:montarPainelImagem(im)}));

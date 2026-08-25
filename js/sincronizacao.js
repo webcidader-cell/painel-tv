@@ -17,11 +17,20 @@ function ativarEscutaDaNuvem(){
   }
   registrar("config", snap=>{
     const v = snap.val() || {};
+    const chaveApiFutebolAntes = CONFIG.apiFutebolKey;
+    const precisaBuscarJogos = dados.jogosDoDia === null || chaveApiFutebolAntes !== (v.apiFutebolKey || "");
     CONFIG = { ...CONFIG_PADRAO, ...v };
     gravarLocal(CHAVES.config, CONFIG);
     document.getElementById("nomePainel").textContent = CONFIG.nomePainel;
     atualizarLogoTopbar();
-    reiniciarRotacaoComDebounce();
+    if(precisaBuscarJogos){
+      // a config real da nuvem (com a chave da API-Football) pode chegar DEPOIS da primeira
+      // tentativa de buscar os jogos no carregamento da página — sem isso, o painel ficava
+      // "carregando" pra sempre até alguém salvar Configurações manualmente.
+      buscarJogosDoDia().then(()=> reiniciarRotacaoComDebounce());
+    } else {
+      reiniciarRotacaoComDebounce();
+    }
   });
   registrar("avisos", snap=>{
     AVISOS = snap.val() || [];

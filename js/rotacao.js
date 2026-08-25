@@ -21,9 +21,11 @@ function garantirEntradaPlaylist(chave){
 
 function listaBaseDePaineis(){
   const lista = [ {tipo:"clima", html:montarPainelClima()}, {tipo:"cotacoes", html:montarPainelCotacoes()} ];
-  lista.push({tipo:"jogosDoDia", id:"p1", html:montarPainelJogosDoDia(1)});
-  const paginaDois = montarPainelJogosDoDia(2);
-  if(paginaDois) lista.push({tipo:"jogosDoDia", id:"p2", html:paginaDois});
+  if((CONFIG.apiFutebolKey||"").trim()){
+    lista.push({tipo:"jogosDoDia", id:"p1", html:montarPainelJogosDoDia(1)});
+    const paginaDois = montarPainelJogosDoDia(2);
+    if(paginaDois) lista.push({tipo:"jogosDoDia", id:"p2", html:paginaDois});
+  }
   AVISOS.forEach(a=>lista.push({tipo:"aviso", id:a.id, html:montarPainelAviso(a)}));
   NOTICIAS_MANUAIS.forEach(n=>lista.push({tipo:"noticiaManual", id:n.id, html:montarPainelNoticiaManual(n)}));
   IMAGENS.forEach(im=>lista.push({tipo:"imagem", id:im.id, html:montarPainelImagem(im)}));

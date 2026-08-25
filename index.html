@@ -102,5 +102,16 @@
 <script src="js/rotacao.js"></script>
 <script src="js/app.js"></script>
 <script src="js/admin.js"></script>
+<script>
+  // Registra o Service Worker (permite o painel abrir mesmo sem internet, depois da primeira vez).
+  // Se o navegador não suportar (raro), o app continua funcionando normalmente, só sem esse recurso.
+  if("serviceWorker" in navigator){
+    window.addEventListener("load", ()=>{
+      navigator.serviceWorker.register("./sw.js").catch(erro=>{
+        console.error("Não foi possível ativar o modo offline (Service Worker):", erro);
+      });
+    });
+  }
+</script>
 </body>
 </html>

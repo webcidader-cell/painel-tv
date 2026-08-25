@@ -323,6 +323,11 @@ function renderAbaStatus(){
     (CONFIG.apiFutebolKey||"").trim()
       ? linhaStatus("Jogos do dia", !dados.erroJogos, dados.erroJogos ? (dados.ultimoErroJogos || "Falhou na última tentativa") : "Atualizado " + tempoRelativo(dados.ultimaAtualizacaoJogos) + (dados.jogosDoDia ? " · "+dados.totalJogosDoDia+" jogo(s) hoje" : ""))
       : "",
+    linhaStatus("Modo offline (Service Worker)",
+      !("serviceWorker" in navigator) ? null : !!(navigator.serviceWorker && navigator.serviceWorker.controller),
+      !("serviceWorker" in navigator) ? "Navegador não suporta"
+        : (navigator.serviceWorker && navigator.serviceWorker.controller) ? "Ativo — o painel consegue abrir mesmo sem internet"
+        : "Ainda ativando (normal no primeiro carregamento — recarregue a página em alguns segundos)"),
   ].join("");
 
   const listaErros = ERROS_RECENTES.length

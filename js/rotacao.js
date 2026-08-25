@@ -94,10 +94,14 @@ function avancarPainel(){
     const lista = listaDePaineis();
     indicePainel = (indicePainel+1) % Math.max(lista.length,1);
     renderizarPainelAtual();
+    // reposiciona o novo conteúdo do lado oposto (sem transição), depois desliza pra posição normal
     stageEl.classList.remove("saindo");
+    stageEl.classList.add("entrando-preparado");
+    void stageEl.offsetWidth; // força o navegador a aplicar a posição antes de animar de volta
+    stageEl.classList.remove("entrando-preparado");
     iniciarBarraProgresso();
     agendarProximoAvanco();
-  }, 700);
+  }, 600);
 }
 function iniciarBarraProgresso(){
   const fill = document.getElementById("progressFill");

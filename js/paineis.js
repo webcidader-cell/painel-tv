@@ -82,20 +82,29 @@ function rotuloStatusJogo(status){
   const mapa = { NS:"Não começou", "1H":"1º tempo", HT:"Intervalo", "2H":"2º tempo", ET:"Prorrogação", FT:"Encerrado", AET:"Encerrado (prorrogação)", PEN:"Pênaltis", PST:"Adiado", CANC:"Cancelado" };
   return mapa[status] || status;
 }
-function montarPainelJogosDoDia(){
+const JOGOS_POR_PAGINA = 5;
+function montarPainelJogosDoDia(pagina){
   if(!(CONFIG.apiFutebolKey||"").trim()){
+    if(pagina === 2) return null;
     return `<div class="panel panel-aviso"><div class="eyebrow"><i data-lucide="calendar-days"></i>Futebol</div><div class="aviso-titulo" style="font-size:4.5vh;">Jogos do dia não configurado</div><div class="aviso-texto">Cadastre uma chave gratuita da API-Football em Configurações para ativar essa tela.</div></div>`;
   }
   if(dados.erroJogos){
+    if(pagina === 2) return null;
     return `<div class="panel panel-aviso"><div class="eyebrow"><i data-lucide="wifi-off"></i>Futebol</div><div class="aviso-titulo" style="font-size:4.5vh;">Não foi possível carregar os jogos</div><div class="aviso-texto">Verifique a internet da TV ou se a chave da API-Football ainda é válida.</div></div>`;
   }
   if(dados.jogosDoDia === null){
+    if(pagina === 2) return null;
     return `<div class="panel panel-aviso"><div class="eyebrow"><i data-lucide="calendar-days"></i>Futebol</div><div class="aviso-titulo">Carregando jogos do dia...</div></div>`;
   }
   if(!dados.jogosDoDia.length){
+    if(pagina === 2) return null;
     return `<div class="panel panel-aviso"><div class="eyebrow"><i data-lucide="calendar-days"></i>Futebol</div><div class="aviso-titulo" style="font-size:4.5vh;">Sem jogos hoje</div><div class="aviso-texto">Não há partidas encontradas para hoje.</div></div>`;
   }
-  const linhas = dados.jogosDoDia.map(j=>{
+  const inicio = (pagina - 1) * JOGOS_POR_PAGINA;
+  const jogosDaPagina = dados.jogosDoDia.slice(inicio, inicio + JOGOS_POR_PAGINA);
+  if(!jogosDaPagina.length) return null; // não tem jogo suficiente pra essa página — ela simplesmente não entra na rotação
+
+  const linhas = jogosDaPagina.map(j=>{
     const emAndamento = ["1H","2H","HT","ET"].includes(j.status);
     const encerrado = ["FT","AET","PEN"].includes(j.status);
     const placar = (encerrado || emAndamento) ? `${j.golsCasa ?? 0} — ${j.golsFora ?? 0}` : "×";
@@ -116,8 +125,12 @@ function montarPainelJogosDoDia(){
       </div>
     </div>`;
   }).join("");
-  const restantes = (dados.totalJogosDoDia||0) - dados.jogosDoDia.length;
-  const rodape = restantes > 0 ? `<div class="jogos-rodape">+ ${restantes} outro${restantes>1?"s":""} jogo${restantes>1?"s":""} hoje</div>` : "";
+  const totalPaginas = Math.ceil(Math.min(dados.jogosDoDia.length, JOGOS_POR_PAGINA*2) / JOGOS_POR_PAGINA);
+  const restantes = (dados.totalJogosDoDia||0) - Math.min(dados.jogosDoDia.length, JOGOS_POR_PAGINA*2);
+  const partesRodape = [];
+  if(totalPaginas > 1) partesRodape.push(`Página ${pagina} de ${totalPaginas}`);
+  if(restantes > 0) partesRodape.push(`+ ${restantes} outro${restantes>1?"s":""} jogo${restantes>1?"s":""} hoje`);
+  const rodape = partesRodape.length ? `<div class="jogos-rodape">${partesRodape.join(" · ")}</div>` : "";
   return `<div class="panel"><div class="panel-tabela">
     <div class="tabela-titulo"><i data-lucide="calendar-days"></i>Jogos do dia</div>
     <div class="tabela-wrap" style="padding:1vh 0;">

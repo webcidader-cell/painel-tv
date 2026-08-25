@@ -64,7 +64,7 @@ function atualizarLogoTopbar(){
   if(url){
     el.style.background = "transparent";
     el.style.width = "auto";
-    el.style.height = "6vh";
+    el.style.height = "7.6vh";
     el.innerHTML = `<img src="${String(url).replace(/"/g,"&quot;")}" style="width:100%;height:100%;object-fit:contain;" onerror="this.parentElement.style.background=''; this.parentElement.style.width=''; this.parentElement.style.height=''; this.parentElement.innerHTML='<i data-lucide=monitor-play></i>'; if(window.lucide) lucide.createIcons();">`;
   } else {
     el.style.background = "";

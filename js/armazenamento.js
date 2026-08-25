@@ -62,8 +62,14 @@ function atualizarLogoTopbar(){
   if(!el) return;
   const url = (CONFIG.logoUrl||"").trim();
   if(url){
-    el.innerHTML = `<img src="${String(url).replace(/"/g,"&quot;")}" style="width:100%;height:100%;object-fit:contain;" onerror="this.parentElement.innerHTML='<i data-lucide=monitor-play></i>'; if(window.lucide) lucide.createIcons();">`;
+    el.style.background = "transparent";
+    el.style.width = "auto";
+    el.style.height = "6vh";
+    el.innerHTML = `<img src="${String(url).replace(/"/g,"&quot;")}" style="width:100%;height:100%;object-fit:contain;" onerror="this.parentElement.style.background=''; this.parentElement.style.width=''; this.parentElement.style.height=''; this.parentElement.innerHTML='<i data-lucide=monitor-play></i>'; if(window.lucide) lucide.createIcons();">`;
   } else {
+    el.style.background = "";
+    el.style.width = "";
+    el.style.height = "";
     el.innerHTML = `<i data-lucide="monitor-play"></i>`;
     if(window.lucide) lucide.createIcons();
   }

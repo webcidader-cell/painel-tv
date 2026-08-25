@@ -67,7 +67,8 @@ body{ color:var(--ink); font-family:var(--font-body); overflow:hidden; width:100
 .stage-wrap{ position:relative; z-index:2; flex:1 1 auto; padding:2.4vh 3vw; overflow:hidden; }
 .progress-rail{ position:absolute; top:0; left:0; right:0; height:3px; background:rgba(255,255,255,0.15); }
 .progress-fill{ height:100%; width:0%; background:linear-gradient(90deg,var(--gold),var(--cyan)); }
-.stage{ height:100%; display:flex; align-items:center; justify-content:center; transition:opacity 0.5s ease; }
+.stage{ height:100%; display:flex; align-items:center; justify-content:center; transition:opacity 0.7s cubic-bezier(0.4,0,0.2,1), transform 0.7s cubic-bezier(0.4,0,0.2,1); will-change:opacity, transform; }
+.stage.saindo{ opacity:0; transform:scale(0.985); }
 .panel{ width:100%; height:100%; display:none; align-items:center; opacity:0; animation:fadeIn .6s ease forwards; }
 .panel.active{ display:flex; }
 @keyframes fadeIn{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;} }

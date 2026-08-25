@@ -89,15 +89,15 @@ function duracaoAtualSegundos(){
 
 function avancarPainel(){
   const stageEl = document.getElementById("stage");
-  stageEl.style.opacity = "0";
+  stageEl.classList.add("saindo");
   setTimeout(()=>{
     const lista = listaDePaineis();
     indicePainel = (indicePainel+1) % Math.max(lista.length,1);
     renderizarPainelAtual();
-    stageEl.style.opacity = "1";
+    stageEl.classList.remove("saindo");
     iniciarBarraProgresso();
     agendarProximoAvanco();
-  }, 500);
+  }, 700);
 }
 function iniciarBarraProgresso(){
   const fill = document.getElementById("progressFill");

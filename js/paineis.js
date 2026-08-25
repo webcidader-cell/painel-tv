@@ -65,7 +65,7 @@ function montarPainelAviso(aviso){
 }
 function montarPainelNoticiaManual(n){
   return `<div class="panel"><div class="panel-midia">
-    ${n.imagemUrl ? `<img src="${escapeAttr(n.imagemUrl)}" onerror="this.style.display='none'">` : ""}
+    ${n.imagemUrl ? tagImagemComFundo(n.imagemUrl) : ""}
     <div class="veu"></div>
     <div class="conteudo">
       <div class="eyebrow"><i data-lucide="newspaper"></i>Notícia</div>
@@ -139,12 +139,18 @@ function montarPainelJogosDoDia(pagina){
     </div>
   </div></div>`;
 }
+function tagImagemComFundo(url){
+  const src = escapeAttr(url);
+  // fundo desfocado (preenche tudo, sem sobrar nada em branco) + imagem completa por cima (sem cortar nada)
+  return `<img class="midia-fundo-blur" src="${src}" aria-hidden="true" onerror="this.style.display='none'">
+    <img class="midia-principal" src="${src}" onerror="this.style.opacity='0.15'">`;
+}
 function tagMidia(url, tipoMidia){
   const src = escapeAttr(url);
   if(tipoMidia === "video"){
     return `<video src="${src}" autoplay muted loop playsinline onerror="this.style.opacity='0.15'"></video>`;
   }
-  return `<img src="${src}" onerror="this.style.opacity='0.15'">`;
+  return tagImagemComFundo(url);
 }
 function montarPainelImagem(im){
   return `<div class="panel"><div class="panel-midia legenda-simples">

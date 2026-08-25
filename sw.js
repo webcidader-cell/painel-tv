@@ -2,15 +2,20 @@
    SERVICE WORKER — permite o painel continuar funcionando
    mesmo sem internet nenhuma, depois do primeiro carregamento.
 
-   O que ele guarda em cache: só os arquivos do PRÓPRIO app
-   (index.html, css, js). Dados dinâmicos (clima, cotações,
-   avisos, notícias, jogos) NÃO passam por aqui — esses já têm
-   seu próprio mecanismo de cache local (localStorage), tratado
-   direto pelo app. Este arquivo só garante que o app consiga
-   ABRIR sem internet.
+   O que ele guarda em cache:
+   1) Os arquivos do PRÓPRIO app (index.html, css, js) — sempre.
+   2) IMAGENS E VÍDEOS usados no painel (banners, fotos, logo),
+      mesmo estando hospedados em outro site (ex: GitHub Pages
+      de mídia) — guardados assim que forem exibidos pela
+      primeira vez com internet.
+
+   O que NÃO passa por aqui (fica sempre igual, direto da rede):
+   Firebase, API de clima/cotações/futebol, feed de notícias —
+   esses precisam sempre da informação mais recente, e já têm
+   seu próprio tratamento de erro/cache no app (localStorage).
    ============================================================ */
 
-const CACHE_VERSAO = "v1";
+const CACHE_VERSAO = "v2";
 const CACHE_NOME = "painel-tv-shell-" + CACHE_VERSAO;
 
 const ARQUIVOS_DO_APP = [
@@ -47,21 +52,26 @@ self.addEventListener("activate", (evento) => {
 });
 
 self.addEventListener("fetch", (evento) => {
-  const url = new URL(evento.request.url);
+  const requisicao = evento.request;
+  if (requisicao.method !== "GET") return;
 
-  // Só intercepta pedidos do PRÓPRIO site. Tudo que for de fora (Firebase, API de clima,
-  // cotações, futebol, notícias, vídeos/imagens hospedados em outro lugar) passa direto
-  // pra rede, sem cache — porque isso precisa ser sempre atualizado quando há internet.
-  if (url.origin !== self.location.origin) return;
-  if (evento.request.method !== "GET") return;
+  const ehArquivoDoApp = new URL(requisicao.url).origin === self.location.origin;
+  const ehImagemOuVideo = requisicao.destination === "image" || requisicao.destination === "video";
+
+  // Só mexemos em dois casos: arquivos do próprio app (qualquer um), OU imagens/vídeos
+  // de QUALQUER origem (banners, fotos, logo hospedados em outro site). Todo o resto —
+  // chamadas de API, Firebase, JSON, RSS — passa direto pra rede, sem cache daqui.
+  if (!ehArquivoDoApp && !ehImagemOuVideo) return;
 
   evento.respondWith(
-    caches.match(evento.request).then((respostaEmCache) => {
-      const buscaNaRede = fetch(evento.request)
+    caches.match(requisicao).then((respostaEmCache) => {
+      const buscaNaRede = fetch(requisicao)
         .then((respostaDaRede) => {
-          if (respostaDaRede && respostaDaRede.status === 200) {
+          // imagens/vídeos de outra origem chegam como resposta "opaca" (sem conseguir ler
+          // o status) — isso é normal e esperado, guardamos assim mesmo.
+          if (respostaDaRede && (respostaDaRede.status === 200 || respostaDaRede.type === "opaque")) {
             const copia = respostaDaRede.clone();
-            caches.open(CACHE_NOME).then((cache) => cache.put(evento.request, copia));
+            caches.open(CACHE_NOME).then((cache) => cache.put(requisicao, copia));
           }
           return respostaDaRede;
         })
